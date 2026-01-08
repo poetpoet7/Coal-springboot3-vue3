@@ -1,0 +1,54 @@
+# ====================== #
+#     IDE & Editor       #
+# ====================== #
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+*.swp
+*.swo
+*~
+
+# ====================== #
+#     Java / Maven       #
+# ====================== #
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+hs_err_pid*
+replay_pid*
+
+# ====================== #
+#     Node.js / Vue      #
+# ====================== #
+node_modules/
+dist/
+.cache/
+*.local
+
+# 环境变量文件（可选：如果包含敏感信息则取消注释）
+# .env
+# .env.local
+# .env.*.local
+
+# ====================== #
+#     OS Generated       #
+# ====================== #
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ====================== #
+#     Other             #
+# ====================== #
+*.tmp
+*.bak
+*.backup
+logs/

@@ -1,0 +1,14 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.AdminMapper">
+
+    <!-- 自定义查询：支持条件搜索 -->
+    <select id="selectAll" resultType="com.example.entity.Admin">
+        select * from admin
+        <where>
+            <if test="name != null and name != ''"> and name like '%' + #{name} + '%'</if>
+        </where>
+    </select>
+
+</mapper>
