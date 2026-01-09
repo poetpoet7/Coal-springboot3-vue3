@@ -51,6 +51,7 @@ public class NoticeService {
         if (ObjectUtil.isNotEmpty(notice.getTitle())) {
             queryWrapper.like("title", notice.getTitle());
         }
+        queryWrapper.orderByDesc("id");
         return noticeMapper.selectPage(page, queryWrapper);
     }
 

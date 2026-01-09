@@ -74,9 +74,11 @@ const load = () => {
       title: data.title
     }
   }).then(res => {
+    console.log('Notice selectPage response:', res)
     if (res.code === '200') {
-      data.tableData = res.data?.list || []
-      data.total = res.data?.total
+      // 兼容 list 和 records 两种结构，防止字段名不一致导致不显示
+      data.tableData = res.data?.records || res.data?.list || []
+      data.total = res.data?.total || 0
     }
   })
 }

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.TongjiCzcptouzikuaibaoMapper">
+
+    <resultMap id="BaseResultMap" type="com.example.entity.TongjiCzcptouzikuaibao">
+            <id property="id" column="ID" />
+            <result property="danweiid" column="DanWeiID" />
+            <result property="nianfen" column="NianFen" />
+            <result property="yuefen" column="YueFen" />
+            <result property="xuhao" column="XuHao" />
+            <result property="bianma" column="BianMa" />
+            <result property="jingyingzongzhiheji" column="JingYingZongZhiHeJi" />
+            <result property="jingyingzongzhihejileiji" column="JingYingZongZhiHeJiLeiJi" />
+            <result property="gongyechanzhi" column="GongYeChanZhi" />
+            <result property="gongyechanzhileiji" column="GongYeChanZhiLeiJi" />
+            <result property="qitachanzhi" column="QiTaChanZhi" />
+            <result property="qitachanzhileiji" column="QiTaChanZhiLeiJi" />
+            <result property="xinchanpinjiazhi" column="XinChanPinJiaZhi" />
+            <result property="xinchanpinjiazhileiji" column="XinChanPinJiaZhiLeiJi" />
+            <result property="gyxsczheji" column="GYXSCZHeJi" />
+            <result property="gyxsczhejileiji" column="GYXSCZHeJiLeiJi" />
+            <result property="chukoujiaohuozhi" column="ChuKouJiaoHuoZhi" />
+            <result property="chukoujiaohuozhileiji" column="ChuKouJiaoHuoZhiLeiJi" />
+            <result property="jiushinianbubianjia" column="JiuShiNianBuBianJia" />
+            <result property="jiushinianbubianjialeiji" column="JiuShiNianBuBianJiaLeiJi" />
+            <result property="qiyeyongdianliang" column="QiYeYongDianLiang" />
+            <result property="qiyeyongdianliangleiji" column="QiYeYongDianLiangLeiJi" />
+            <result property="gdzctzheji" column="GDZCTZHeJi" />
+            <result property="gdzctzhejileiji" column="GDZCTZHeJiLeiJi" />
+            <result property="jishugaizao" column="JiShuGaiZao" />
+            <result property="jishugaizaoleiji" column="JiShuGaiZaoLeiJi" />
+            <result property="yuanmei" column="YuanMei" />
+            <result property="yuanmeileiji" column="YuanMeiLeiJi" />
+            <result property="jingmei" column="JingMei" />
+            <result property="jingmeileiji" column="JingMeiLeiJi" />
+            <result property="niaosu" column="NiaoSu" />
+            <result property="niaosuleiji" column="NiaoSuLeiJi" />
+            <result property="jiachun" column="JiaChun" />
+            <result property="jiachunleiji" column="JiaChunLeiJi" />
+            <result property="cusuan" column="CuSuan" />
+            <result property="cusuanleiji" column="CuSuanLeiJi" />
+            <result property="jiaotan" column="JiaoTan" />
+            <result property="jiaotanleiji" column="JiaoTanLeiJi" />
+            <result property="cusuanyizhi" column="CuSuanYiZhi" />
+            <result property="cusuanyizhileiji" column="CuSuanYiZhiLeiJi" />
+            <result property="cusuandingzhi" column="CuSuanDingZhi" />
+            <result property="cusuandingzhileiji" column="CuSuanDingZhiLeiJi" />
+            <result property="cugan" column="CuGan" />
+            <result property="cuganleiji" column="CuGanLeiJi" />
+            <result property="tansuanerjiazhi" column="TanSuanErJiaZhi" />
+            <result property="tansuanerjiazhileiji" column="TanSuanErJiaZhiLeiJi" />
+            <result property="hechengan" column="HeChengAn" />
+            <result property="hechenganleiji" column="HeChengAnLeiJi" />
+            <result property="dingchun" column="DingChun" />
+            <result property="dingchunleiji" column="DingChunLeiJi" />
+            <result property="jujiaquan" column="JuJiaQuan" />
+            <result property="jujiaquanleiji" column="JuJiaQuanLeiJi" />
+            <result property="gaizhiliqing" column="GaiZhiLiQing" />
+            <result property="gaizhiliqingleiji" column="GaiZhiLiQingLeiJi" />
+            <result property="enyou" column="EnYou" />
+            <result property="enyouleiji" column="EnYouLeiJi" />
+            <result property="fuhefei" column="FuHeFei" />
+            <result property="fuhefeileiji" column="FuHeFeiLeiJi" />
+            <result property="lvding" column="LvDing" />
+            <result property="lvdingleiji" column="LvDingLeiJi" />
+            <result property="tansuzhipin" column="TanSuZhiPin" />
+            <result property="tansuzhipinleiji" column="TanSuZhiPinLeiJi" />
+            <result property="lvzhucai" column="LvZhuCai" />
+            <result property="lvzhucaileiji" column="LvZhuCaiLeiJi" />
+            <result property="lvjiyacai" column="LvJiYaCai" />
+            <result property="lvjiyacaileiji" column="LvJiYaCaiLeiJi" />
+            <result property="fadianliang" column="FaDianLiang" />
+            <result property="fadianliangleiji" column="FaDianLiangLeiJi" />
+            <result property="pidaiyunshuji" column="PiDaiYunShuJi" />
+            <result property="pidaiyunshujileiji" column="PiDaiYunShuJiLeiJi" />
+            <result property="shusongdai" column="ShuSongDai" />
+            <result property="shusongdaileiji" column="ShuSongDaiLeiJi" />
+            <result property="dianlan" column="DianLan" />
+            <result property="dianlanleiji" column="DianLanLeiJi" />
+            <result property="yeyazhijia" column="YeYaZhiJia" />
+            <result property="yeyazhijialeiji" column="YeYaZhiJiaLeiJi" />
+            <result property="guabanyunshuji" column="GuaBanYunShuJi" />
+            <result property="guabanyunshujileiji" column="GuaBanYunShuJiLeiJi" />
+            <result property="gaolingtu" column="GaoLingTu" />
+            <result property="gaolingtuleiji" column="GaoLingTuLeiJi" />
+            <result property="qunianyuanmei" column="QuNianYuanMei" />
+            <result property="qunianyuanmeileiji" column="QuNianYuanMeiLeiJi" />
+            <result property="qunianjingmei" column="QuNianJingMei" />
+            <result property="qunianjingmeileiji" column="QuNianJingMeiLeiJi" />
+            <result property="beizhu1" column="BeiZhu1" />
+            <result property="beizhu2" column="BeiZhu2" />
+            <result property="beizhu3" column="BeiZhu3" />
+            <result property="beizhu4" column="BeiZhu4" />
+            <result property="beizhu5" column="BeiZhu5" />
+            <result property="beizhu6" column="BeiZhu6" />
+            <result property="beizhu" column="BeiZhu" />
+            <result property="beizhu0" column="BeiZhu0" />
+            <result property="zhuangtai" column="ZhuangTai" />
+            <result property="qingchaiyou" column="QingChaiYou" />
+            <result property="qingchaiiyouleiji" column="QingChaiiYouLeiJi" />
+            <result property="zhongchaiyou" column="ZhongChaiYou" />
+            <result property="zhongchaiyouleiji" column="ZhongChaiYouLeiJi" />
+            <result property="shinaoyou" column="ShiNaoYou" />
+            <result property="shinaoyouleiji" column="ShiNaoYouLeiJi" />
+            <result property="yehuashiyouqi" column="YeHuaShiYouQi" />
+            <result property="yehuashiyouqileiji" column="YeHuaShiYouQiLeiJi" />
+            <result property="qitachanpin" column="QiTaChanPin" />
+            <result property="qitachanpinleiji" column="QiTaChanPinLeiJi" />
+            <result property="liuhuang" column="LiuHuang" />
+            <result property="liuhuangleiji" column="LiuHuangLeiJi" />
+            <result property="liuhuangan" column="LiuHuangAn" />
+            <result property="liuhuanganleiji" column="LiuHuangAnLeiJi" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID,DanWeiID,NianFen,YueFen,XuHao,BianMa,
+        JingYingZongZhiHeJi,JingYingZongZhiHeJiLeiJi,GongYeChanZhi,GongYeChanZhiLeiJi,QiTaChanZhi,
+        QiTaChanZhiLeiJi,XinChanPinJiaZhi,XinChanPinJiaZhiLeiJi,GYXSCZHeJi,GYXSCZHeJiLeiJi,
+        ChuKouJiaoHuoZhi,ChuKouJiaoHuoZhiLeiJi,JiuShiNianBuBianJia,JiuShiNianBuBianJiaLeiJi,QiYeYongDianLiang,
+        QiYeYongDianLiangLeiJi,GDZCTZHeJi,GDZCTZHeJiLeiJi,JiShuGaiZao,JiShuGaiZaoLeiJi,
+        YuanMei,YuanMeiLeiJi,JingMei,JingMeiLeiJi,NiaoSu,
+        NiaoSuLeiJi,JiaChun,JiaChunLeiJi,CuSuan,CuSuanLeiJi,
+        JiaoTan,JiaoTanLeiJi,CuSuanYiZhi,CuSuanYiZhiLeiJi,CuSuanDingZhi,
+        CuSuanDingZhiLeiJi,CuGan,CuGanLeiJi,TanSuanErJiaZhi,TanSuanErJiaZhiLeiJi,
+        HeChengAn,HeChengAnLeiJi,DingChun,DingChunLeiJi,JuJiaQuan,
+        JuJiaQuanLeiJi,GaiZhiLiQing,GaiZhiLiQingLeiJi,EnYou,EnYouLeiJi,
+        FuHeFei,FuHeFeiLeiJi,LvDing,LvDingLeiJi,TanSuZhiPin,
+        TanSuZhiPinLeiJi,LvZhuCai,LvZhuCaiLeiJi,LvJiYaCai,LvJiYaCaiLeiJi,
+        FaDianLiang,FaDianLiangLeiJi,PiDaiYunShuJi,PiDaiYunShuJiLeiJi,ShuSongDai,
+        ShuSongDaiLeiJi,DianLan,DianLanLeiJi,YeYaZhiJia,YeYaZhiJiaLeiJi,
+        GuaBanYunShuJi,GuaBanYunShuJiLeiJi,GaoLingTu,GaoLingTuLeiJi,QuNianYuanMei,
+        QuNianYuanMeiLeiJi,QuNianJingMei,QuNianJingMeiLeiJi,BeiZhu1,BeiZhu2,
+        BeiZhu3,BeiZhu4,BeiZhu5,BeiZhu6,BeiZhu,
+        BeiZhu0,ZhuangTai,QingChaiYou,QingChaiiYouLeiJi,ZhongChaiYou,
+        ZhongChaiYouLeiJi,ShiNaoYou,ShiNaoYouLeiJi,YeHuaShiYouQi,YeHuaShiYouQiLeiJi,
+        QiTaChanPin,QiTaChanPinLeiJi,LiuHuang,LiuHuangLeiJi,LiuHuangAn,
+        LiuHuangAnLeiJi
+    </sql>
+</mapper>

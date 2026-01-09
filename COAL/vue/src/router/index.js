@@ -8,9 +8,10 @@ const router = createRouter({
       path: '/manager',
       component: () => import('@/views/Manager.vue'),
       children: [
-        { path: 'home', meta: { name: '系统首页' }, component: () => import('@/views/manager/Home.vue'),  },
+        { path: 'home', meta: { name: '系统首页' }, component: () => import('@/views/manager/Home.vue'), },
         { path: 'admin', meta: { name: '管理员信息' }, component: () => import('@/views/manager/Admin.vue'), },
         { path: 'notice', meta: { name: '系统公告' }, component: () => import('@/views/manager/Notice.vue'), },
+        { path: 'touzikuaibao', meta: { name: '投资快报' }, component: () => import('@/views/manager/TouZiKuaiBao.vue'), },
         { path: 'person', meta: { name: '个人资料' }, component: () => import('@/views/manager/Person.vue'), },
         { path: 'password', meta: { name: '修改密码' }, component: () => import('@/views/manager/Password.vue'), },
       ]
@@ -19,8 +20,8 @@ const router = createRouter({
       path: '/front',
       component: () => import('@/views/Front.vue'),
       children: [
-        { path: 'home', component: () => import('@/views/front/Home.vue'),  },
-        { path: 'person', component: () => import('@/views/front/Person.vue'),  }
+        { path: 'home', component: () => import('@/views/front/Home.vue'), },
+        { path: 'person', component: () => import('@/views/front/Person.vue'), }
       ]
     },
     { path: '/login', component: () => import('@/views/Login.vue') },

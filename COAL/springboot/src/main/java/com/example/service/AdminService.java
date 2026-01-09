@@ -66,6 +66,7 @@ public class AdminService {
         if (ObjectUtil.isNotEmpty(admin.getName())) {
             queryWrapper.like("name", admin.getName());
         }
+        queryWrapper.orderByDesc("id");
         return adminMapper.selectPage(page, queryWrapper);
     }
 
