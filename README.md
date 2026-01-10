@@ -27,33 +27,7 @@ fileBaseUrl: http://localhost:${server.port}  # 文件访问地址
 
 ## 数据库配置
 
-使用 **SQL Server** 数据库，需创建 `coal` 数据库并建表：
-
-```sql
--- 管理员表
-CREATE TABLE admin (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    username NVARCHAR(50) NOT NULL UNIQUE,
-    password NVARCHAR(100) NOT NULL,
-    name NVARCHAR(50),
-    avatar NVARCHAR(255),
-    role NVARCHAR(20),
-    phone NVARCHAR(20),
-    email NVARCHAR(100)
-);
-
--- 公告表
-CREATE TABLE notice (
-    id INT PRIMARY KEY IDENTITY(1,1),
-    title NVARCHAR(200) NOT NULL,
-    content NVARCHAR(MAX),
-    time NVARCHAR(50)
-);
-
--- 默认管理员（密码 123456）
-INSERT INTO admin (username, password, name, role) 
-VALUES ('admin', '123456', '系统管理员', 'ADMIN');
-```
+使用 **SQL Server** 数据库，创建 `coal` 数据库并建表
 
 ---
 
