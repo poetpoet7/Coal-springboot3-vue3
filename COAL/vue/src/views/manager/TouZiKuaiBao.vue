@@ -791,10 +791,15 @@ const handleExport = () => {
     return;
   }
   
+  // 获取本地存储中的token
+  const user = JSON.parse(localStorage.getItem("xm-user") || '{}');
+  const token = user.token || '';
+  
   const params = new URLSearchParams({
     danweiId: queryForm.danweiId,
     nianfen: queryForm.nianfen,
-    leibie: queryForm.leibie
+    leibie: queryForm.leibie,
+    token: token  // 通过URL参数传递token，因为window.open无法设置Header
   });
   
   if (queryForm.leibie === '本月' && queryForm.yuefen) {

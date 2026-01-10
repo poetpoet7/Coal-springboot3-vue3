@@ -51,7 +51,7 @@
               <el-icon><Menu /></el-icon>
               <span>用户管理</span>
             </template>
-            <el-menu-item index="/manager/admin">管理员信息</el-menu-item>
+            <el-menu-item index="/manager/userinfo">用户信息</el-menu-item>
           </el-sub-menu>
 <!--          <el-menu-item index="/manager/chat">-->
 <!--            <span>智能问答</span>-->

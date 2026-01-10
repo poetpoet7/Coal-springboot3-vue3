@@ -1,9 +1,8 @@
 package com.example.controller;
 
 import com.example.common.Result;
-import com.example.common.enums.RoleEnum;
 import com.example.entity.Account;
-import com.example.service.AdminService;
+import com.example.service.UserInfoService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,26 +10,24 @@ import org.springframework.web.bind.annotation.*;
 public class WebController {
 
     @Resource
-    private AdminService adminService;
+    private UserInfoService userInfoService;
 
     /**
      * 默认请求接口
      */
     @GetMapping("/")
-    public Result hello () {
+    public Result hello() {
         return Result.success();
     }
 
     /**
-     * 登录
+     * 统一登录接口（优先使用UserInfo表，兼容C#系统老用户）
      */
     @PostMapping("/login")
     public Result login(@RequestBody Account account) {
-        Account loginAccount = null;
-        if (RoleEnum.ADMIN.name().equals(account.getRole())) {
-            loginAccount = adminService.login(account);
-        }
-        return Result.success(loginAccount);
+        // 直接调用UserInfoService登录（使用userinfo表）
+        // 这样可以兼容C#系统的老用户
+        return Result.success(userInfoService.login(account));
     }
 
     /**
@@ -46,9 +43,8 @@ public class WebController {
      */
     @PutMapping("/updatePassword")
     public Result updatePassword(@RequestBody Account account) {
-        if (RoleEnum.ADMIN.name().equals(account.getRole())) {
-            adminService.updatePassword(account);
-        }
+        // 调用UserInfoService修改密码
+        userInfoService.updatePassword(account);
         return Result.success();
     }
 

@@ -10,6 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -60,10 +62,17 @@ public class TouZiKuaiBaoController {
         try {
             byte[] excelData = touZiKuaiBaoService.exportExcel(danweiId, nianfen, yuefen, leibie);
 
+            // 构建文件名
+            String fileName = "产能投资快报_" + nianfen + (yuefen != null ? "_" + yuefen : "") + ".xlsx";
+            // URL编码中文文件名
+            String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8)
+                    .replaceAll("\\+", "%20");
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            headers.setContentDispositionFormData("attachment",
-                    "产能投资快报_" + nianfen + (yuefen != null ? "_" + yuefen : "") + ".xlsx");
+            // 使用RFC 5987标准格式，同时设置filename和filename*以兼容不同浏览器
+            headers.add(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + encodedFileName + "\"; filename*=UTF-8''" + encodedFileName);
 
             return new ResponseEntity<>(excelData, headers, HttpStatus.OK);
         } catch (Exception e) {
