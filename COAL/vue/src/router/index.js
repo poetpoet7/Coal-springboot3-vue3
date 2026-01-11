@@ -11,7 +11,9 @@ const router = createRouter({
         { path: 'home', meta: { name: '系统首页' }, component: () => import('@/views/manager/Home.vue'), },
         { path: 'userinfo', meta: { name: '用户信息' }, component: () => import('@/views/manager/UserInfo.vue'), },
         { path: 'notice', meta: { name: '系统公告' }, component: () => import('@/views/manager/Notice.vue'), },
-        { path: 'touzikuaibao', meta: { name: '投资快报' }, component: () => import('@/views/manager/TouZiKuaiBao.vue'), },
+        { path: 'touzikuaibao', meta: { name: '产值、主要产品产量及固定资产投资快报' }, component: () => import('@/views/manager/TouZiKuaiBao.vue'), },
+        { path: 'czkb/manage', meta: { name: '产值快报管理' }, component: () => import('@/views/manager/CzkbManage.vue'), },
+        { path: 'czkb/approve', meta: { name: '产值快报审批' }, component: () => import('@/views/manager/CzkbApprove.vue'), },
         { path: 'person', meta: { name: '个人资料' }, component: () => import('@/views/manager/Person.vue'), },
         { path: 'password', meta: { name: '修改密码' }, component: () => import('@/views/manager/Password.vue'), },
       ]

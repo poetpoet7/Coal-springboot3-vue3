@@ -1,6 +1,34 @@
 import axios from "axios";
-import {ElMessage} from "element-plus";
+import { ElMessage } from "element-plus";
 import router from "@/router/index.js";
+
+// 会话超时时间：30分钟（毫秒）
+const SESSION_TIMEOUT = 30 * 60 * 1000;
+// 最后操作时间的存储键
+const LAST_ACTIVITY_KEY = 'xm-last-activity';
+
+// 检查会话是否超时
+const checkSessionTimeout = () => {
+    const lastActivity = localStorage.getItem(LAST_ACTIVITY_KEY);
+    if (lastActivity) {
+        const now = Date.now();
+        const lastTime = parseInt(lastActivity);
+        if (now - lastTime > SESSION_TIMEOUT) {
+            // 超时，清除用户信息并跳转到登录页
+            localStorage.removeItem('xm-user');
+            localStorage.removeItem(LAST_ACTIVITY_KEY);
+            ElMessage.warning('登录已过期，请重新登录');
+            router.push('/login');
+            return true;
+        }
+    }
+    return false;
+};
+
+// 更新最后操作时间
+const updateLastActivity = () => {
+    localStorage.setItem(LAST_ACTIVITY_KEY, Date.now().toString());
+};
 
 const request = axios.create({
     baseURL: import.meta.env.VITE_BASE_URL,
@@ -11,6 +39,15 @@ const request = axios.create({
 // 可以自请求发送前对请求做一些处理
 request.interceptors.request.use(config => {
     config.headers['Content-Type'] = 'application/json;charset=utf-8';
+
+    // 检查会话是否超时
+    if (checkSessionTimeout()) {
+        return Promise.reject(new Error('会话已超时'));
+    }
+
+    // 更新最后操作时间（每次发起请求时刷新）
+    updateLastActivity();
+
     //从本地缓存中拿到当前用户信息，包括token，然后将token设置为请求头
     let user = JSON.parse(localStorage.getItem("xm-user") || '{}')
     config.headers['token'] = user.token || ''
@@ -31,6 +68,8 @@ request.interceptors.response.use(
         // 当权限验证不通过的时候给出提示
         if (res.code === '401') {
             ElMessage.error(res.msg)
+            localStorage.removeItem('xm-user');
+            localStorage.removeItem(LAST_ACTIVITY_KEY);
             router.push('/login')
         }
         // 兼容服务端返回的字符串数据
@@ -40,9 +79,12 @@ request.interceptors.response.use(
         return res;
     },
     error => {
-        if (error.response.status === 404) {
+        if (error.message === '会话已超时') {
+            return Promise.reject(error);
+        }
+        if (error.response?.status === 404) {
             ElMessage.error('未找到请求接口')
-        } else if (error.response.status === 500) {
+        } else if (error.response?.status === 500) {
             ElMessage.error('系统异常，请查看后端控制台报错')
         } else {
             console.error(error.message)

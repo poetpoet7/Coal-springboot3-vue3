@@ -1,6 +1,7 @@
 <template>
   <div class="login-container">
     <div class="login-box">
+      <div style="font-weight: bold; font-size: 32px; text-align: center; margin-bottom: 20px; color: #1450aa">集团管理系统</div>
       <div style="font-weight: bold; font-size: 24px; text-align: center; margin-bottom: 30px; color: #1450aa">欢 迎 登 录</div>
       <el-form ref="formRef" :model="data.form" :rules="data.rules">
         <el-form-item prop="username">

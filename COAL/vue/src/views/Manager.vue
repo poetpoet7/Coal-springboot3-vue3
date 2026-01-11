@@ -1,9 +1,9 @@
 <template>
   <div class="manager-container">
     <div class="manager-header">
-      <div class="manager-header-left">
+      <div class="manager-header-left" :style="{ width: sidebarWidth + 'px' }">
         <img src="@/assets/imgs/logo.png" alt="">
-        <div class="title">管理系统</div>
+        <div class="title" v-show="sidebarWidth > 150" @click="goHome" style="cursor: pointer;">管理系统</div>
       </div>
       <div class="manager-header-center">
         <el-breadcrumb separator="/">
@@ -29,34 +29,98 @@
     </div>
     <!-- 下面部分开始 -->
     <div style="display: flex">
-      <div class="manager-main-left">
-        <el-menu :default-active="router.currentRoute.value.path"
-                 :default-openeds="['1', '2']"
-                 router
-        >
-          <el-menu-item index="/manager/home">
-            <el-icon><HomeFilled /></el-icon>
-            <span>系统首页</span>
-          </el-menu-item>
-          <el-sub-menu index="1">
-            <template #title>
-              <el-icon><Menu /></el-icon>
-              <span>信息管理</span>
-            </template>
-            <el-menu-item index="/manager/notice">系统公告</el-menu-item>
-            <el-menu-item index="/manager/touzikuaibao">投资快报</el-menu-item>
-          </el-sub-menu>
-          <el-sub-menu index="2">
-            <template #title>
-              <el-icon><Menu /></el-icon>
-              <span>用户管理</span>
-            </template>
-            <el-menu-item index="/manager/userinfo">用户信息</el-menu-item>
-          </el-sub-menu>
-<!--          <el-menu-item index="/manager/chat">-->
-<!--            <span>智能问答</span>-->
-<!--          </el-menu-item>-->
-        </el-menu>
+      <div class="manager-main-left" :style="{ width: sidebarWidth + 'px' }">
+        <div class="sidebar-scroll-container">
+          <el-menu :default-active="router.currentRoute.value.path"
+                   router
+          >
+            <el-menu-item index="/manager/home">
+              <el-icon><HomeFilled /></el-icon>
+              <span>系统首页</span>
+            </el-menu-item>
+            
+            <!-- 统计 -->
+            <el-sub-menu index="tongji">
+              <template #title>
+                <el-icon><DataAnalysis /></el-icon>
+                <span>统计</span>
+              </template>
+              
+              <!-- 生产经营 -->
+              <el-sub-menu index="scjy">
+                <template #title>
+                  <el-icon><TrendCharts /></el-icon>
+                  <span>生产经营</span>
+                </template>
+                
+                <!-- 综合生产 -->
+                <el-sub-menu index="zhsc">
+                  <template #title>
+                    <el-icon><Operation /></el-icon>
+                    <span>综合生产</span>
+                  </template>
+                  
+                  <!-- 产值、主要产品产量及固定资产投资快报 -->
+                  <el-sub-menu index="czkb">
+                    <template #title>
+                      <el-icon><Document /></el-icon>
+                      <span>产值、主要产品产量及固定资产投资快报</span>
+                    </template>
+                    <el-menu-item index="/manager/czkb/manage">
+                      <el-icon><Edit /></el-icon>
+                      <span>管理</span>
+                    </el-menu-item>
+                    <el-menu-item index="/manager/czkb/approve">
+                      <el-icon><Stamp /></el-icon>
+                      <span>审批</span>
+                    </el-menu-item>
+                  </el-sub-menu>
+                  
+                  <!-- 统计报表 -->
+                  <el-sub-menu index="tjbb">
+                    <template #title>
+                      <el-icon><DataLine /></el-icon>
+                      <span>统计报表</span>
+                    </template>
+                    <el-menu-item index="/manager/touzikuaibao">
+                      <el-icon><PieChart /></el-icon>
+                      <span>产值、主要产品产量及固定资产投资快报</span>
+                    </el-menu-item>
+                  </el-sub-menu>
+                </el-sub-menu>
+              </el-sub-menu>
+            </el-sub-menu>
+            
+            <!-- 信息管理 -->
+            <el-sub-menu index="info">
+              <template #title>
+                <el-icon><Files /></el-icon>
+                <span>信息管理</span>
+              </template>
+              <el-menu-item index="/manager/notice">
+                <el-icon><Bell /></el-icon>
+                <span>系统公告</span>
+              </el-menu-item>
+            </el-sub-menu>
+            
+            <!-- 用户管理 -->
+            <el-sub-menu index="user">
+              <template #title>
+                <el-icon><User /></el-icon>
+                <span>用户管理</span>
+              </template>
+              <el-menu-item index="/manager/userinfo">
+                <el-icon><UserFilled /></el-icon>
+                <span>用户信息</span>
+              </el-menu-item>
+            </el-sub-menu>
+          </el-menu>
+        </div>
+        <!-- 拖动调整宽度的手柄 -->
+        <div class="resizer" 
+             :class="{ 'is-dragging': isDragging }"
+             @mousedown="startDragging"
+        ></div>
       </div>
       <div class="manager-main-right">
         <RouterView @updateUser="updateUser" />
@@ -69,18 +133,56 @@
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref, onMounted, onUnmounted } from "vue";
 import router from "@/router/index.js";
-import {ElMessage} from "element-plus";
+import { ElMessage } from "element-plus";
 
 const data = reactive({
   //取出来的字符串信息转换为JSON数据
   user: JSON.parse(localStorage.getItem('xm-user') || '{}')
 })
 
+// 侧边栏宽度相关逻辑
+const sidebarWidth = ref(220) // 默认宽度
+const isDragging = ref(false)
+
+const startDragging = (e) => {
+  isDragging.value = true
+  document.addEventListener('mousemove', onMouseMove)
+  document.addEventListener('mouseup', stopDragging)
+  // 防止拖拽时选中文字
+  document.body.style.userSelect = 'none'
+  document.body.style.cursor = 'col-resize'
+}
+
+const onMouseMove = (e) => {
+  if (isDragging.value) {
+    // 限制最小和最大宽度
+    let newWidth = e.clientX
+    if (newWidth < 60) newWidth = 60
+    if (newWidth > 600) newWidth = 600
+    sidebarWidth.value = newWidth
+  }
+}
+
+const stopDragging = () => {
+  isDragging.value = false
+  document.removeEventListener('mousemove', onMouseMove)
+  document.removeEventListener('mouseup', stopDragging)
+  document.body.style.userSelect = 'auto'
+  document.body.style.cursor = 'default'
+}
+
 const logout = () => {
   localStorage.removeItem('xm-user')
   router.push('/login')
+}
+
+// 点击"管理系统"回到首页并刷新
+const goHome = () => {
+  router.push('/manager/home').then(() => {
+    location.reload()
+  })
 }
 
 const updateUser = () => {
