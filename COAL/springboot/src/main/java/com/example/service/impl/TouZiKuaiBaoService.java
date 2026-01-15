@@ -5,6 +5,7 @@ import com.example.entity.Danwei;
 import com.example.entity.TongjiCzcptouzikuaibao;
 import com.example.mapper.DanweiMapper;
 import com.example.mapper.TongjiCzcptouzikuaibaoMapper;
+import com.example.utils.CumulativeUtils;
 import jakarta.annotation.Resource;
 import lombok.Data;
 import org.apache.poi.ss.usermodel.*;
@@ -14,9 +15,9 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +34,11 @@ public class TouZiKuaiBaoService {
 
     // 汉字数字映射
     private static final String[] CHINESE_NUMBERS = { "", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十" };
+
+    // 煤业公司ID
+    private static final int MEIYE_GONGSI_ID = 2;
+    // 兖矿集团公司ID（审批层级计算的根节点）
+    private static final int YANKUANG_JITUAN_ID = 1;
 
     /**
      * 单位节点类（包含序号和层级信息）
@@ -57,17 +63,13 @@ public class TouZiKuaiBaoService {
      * @return 报表数据列表
      */
     public List<Map<String, Object>> getReportData(Integer danweiId, Integer nianfen, Integer yuefen, String leibie) {
-        // 获取所有单位
+        // 【优化】一次性获取所有单位
         List<Danwei> allUnits = danweiMapper.selectList(null);
 
-        // 根据类别预加载数据
-        // 对于"累计"模式，需要查询每个单位在该年份中 <= 指定月份的最新一条记录
-        Map<Integer, TongjiCzcptouzikuaibao> dataCache = new HashMap<>();
-        if ("累计".equals(leibie)) {
-            dataCache = loadCumulativeData(nianfen, yuefen);
-        }
+        // 【优化】一次性批量加载所有报表数据
+        Map<Integer, TongjiCzcptouzikuaibao> dataCache = loadAllReportData(nianfen, yuefen, leibie);
 
-        // 构建单位树
+        // 构建单位树（使用批量加载的数据缓存）
         DanweiNode rootNode = buildUnitTreeWithData(danweiId, allUnits, nianfen, yuefen, leibie, 0, "", dataCache);
 
         // 展开树为列表
@@ -96,33 +98,42 @@ public class TouZiKuaiBaoService {
     }
 
     /**
-     * 加载累计模式的数据
-     * 对于每个单位，查询该年份中 <= 指定月份的最新一条记录
+     * 【优化】批量加载所有报表数据（一次查询）
      * 
      * @param nianfen 年份
      * @param yuefen  月份
+     * @param leibie  类别（本月/累计）
      * @return 单位ID -> 数据记录的映射
      */
-    private Map<Integer, TongjiCzcptouzikuaibao> loadCumulativeData(Integer nianfen, Integer yuefen) {
-        Map<Integer, TongjiCzcptouzikuaibao> result = new HashMap<>();
-
-        // 查询该年份中 <= 指定月份的所有记录
+    private Map<Integer, TongjiCzcptouzikuaibao> loadAllReportData(Integer nianfen, Integer yuefen, String leibie) {
         QueryWrapper<TongjiCzcptouzikuaibao> wrapper = new QueryWrapper<>();
         wrapper.eq("NianFen", nianfen);
-        wrapper.le("YueFen", yuefen);
-        wrapper.orderByDesc("YueFen"); // 按月份降序，这样同一单位的最新记录在前面
 
-        List<TongjiCzcptouzikuaibao> allData = tongjiMapper.selectList(wrapper);
-
-        // 对于每个单位，只保留最新月份的记录（第一条遇到的）
-        for (TongjiCzcptouzikuaibao data : allData) {
-            Integer danweiId = data.getDanweiid();
-            if (!result.containsKey(danweiId)) {
-                result.put(danweiId, data);
+        if ("累计".equals(leibie)) {
+            // 累计模式：查询该年份中 <= 指定月份的所有记录
+            wrapper.le("YueFen", yuefen);
+            wrapper.orderByDesc("YueFen"); // 按月份降序
+        } else {
+            // 本月模式：精确匹配月份
+            if (yuefen != null) {
+                wrapper.eq("YueFen", yuefen);
             }
         }
 
-        return result;
+        List<TongjiCzcptouzikuaibao> allData = tongjiMapper.selectList(wrapper);
+
+        // 转换为 Map<DanweiId, Data>，累计模式下保留每个单位最新月份的记录
+        return allData.stream().collect(Collectors.toMap(
+                TongjiCzcptouzikuaibao::getDanweiid,
+                Function.identity(),
+                (existing, replacement) -> {
+                    // 保留月份较大的记录
+                    if (existing.getYuefen() == null)
+                        return replacement;
+                    if (replacement.getYuefen() == null)
+                        return existing;
+                    return existing.getYuefen() >= replacement.getYuefen() ? existing : replacement;
+                }));
     }
 
     /**
@@ -173,23 +184,8 @@ public class TouZiKuaiBaoService {
             }
         }
 
-        // 查询当前单位的实际数据
-        TongjiCzcptouzikuaibao actualData = null;
-
-        if ("累计".equals(leibie)) {
-            // 累计模式：从缓存中获取（该年份中 <= 指定月份的最新记录）
-            actualData = dataCache.get(currentUnit.getId().intValue());
-        } else {
-            // 本月模式：查询指定月份的记录
-            QueryWrapper<TongjiCzcptouzikuaibao> wrapper = new QueryWrapper<>();
-            wrapper.eq("DanWeiID", currentUnit.getId());
-            wrapper.eq("NianFen", nianfen);
-            if (yuefen != null) {
-                wrapper.eq("YueFen", yuefen);
-            }
-            List<TongjiCzcptouzikuaibao> dataList = tongjiMapper.selectList(wrapper);
-            actualData = dataList.isEmpty() ? null : dataList.get(0);
-        }
+        // 【优化】直接从批量加载的缓存中获取数据（不再单独查询数据库）
+        TongjiCzcptouzikuaibao actualData = dataCache.get(currentUnit.getId().intValue());
 
         // 判断是否有实际数据或子节点
         boolean hasActualData = actualData != null;
@@ -213,51 +209,19 @@ public class TouZiKuaiBaoService {
     }
 
     /**
-     * 累加子节点数据
+     * 【优化】累加子节点数据（使用工具类）
      */
     private TongjiCzcptouzikuaibao aggregateChildrenData(List<DanweiNode> children) {
         TongjiCzcptouzikuaibao aggregated = new TongjiCzcptouzikuaibao();
 
         for (DanweiNode child : children) {
             if (child.getData() != null) {
-                addData(aggregated, child.getData());
+                // 使用 CumulativeUtils 工具类进行累加
+                CumulativeUtils.addNumericFields(aggregated, child.getData());
             }
         }
 
         return aggregated;
-    }
-
-    /**
-     * 累加两个数据对象的所有数值字段
-     */
-    private void addData(TongjiCzcptouzikuaibao target, TongjiCzcptouzikuaibao source) {
-        try {
-            Field[] fields = TongjiCzcptouzikuaibao.class.getDeclaredFields();
-            for (Field field : fields) {
-                field.setAccessible(true);
-                Object sourceValue = field.get(source);
-
-                if (sourceValue instanceof BigDecimal) {
-                    BigDecimal targetValue = (BigDecimal) field.get(target);
-                    BigDecimal sum = (targetValue != null ? targetValue : BigDecimal.ZERO)
-                            .add((BigDecimal) sourceValue);
-                    field.set(target, sum);
-                } else if (sourceValue instanceof Long) {
-                    Long targetValue = (Long) field.get(target);
-                    Long sum = (targetValue != null ? targetValue : 0L) + (Long) sourceValue;
-                    field.set(target, sum);
-                } else if (sourceValue instanceof Integer &&
-                        !field.getName().equals("danweiid") &&
-                        !field.getName().equals("nianfen") &&
-                        !field.getName().equals("yuefen")) {
-                    Integer targetValue = (Integer) field.get(target);
-                    Integer sum = (targetValue != null ? targetValue : 0) + (Integer) sourceValue;
-                    field.set(target, sum);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -802,130 +766,11 @@ public class TouZiKuaiBaoService {
     }
 
     /**
-     * 计算累计值：本月累计 = 上月累计 + 本月值
+     * 【优化】计算累计值：使用 CumulativeUtils 工具类
+     * 自动匹配 xxx 和 xxxleiji 字段对进行计算
      */
     private void calculateCumulativeValues(TongjiCzcptouzikuaibao current, TongjiCzcptouzikuaibao lastMonth) {
-        // 经营总值累计
-        current.setJingyingzongzhihejileiji(addBigDecimal(
-                current.getJingyingzongzhiheji(),
-                lastMonth != null ? lastMonth.getJingyingzongzhihejileiji() : null));
-
-        // 工业产值累计
-        current.setGongyechanzhileiji(addBigDecimal(
-                current.getGongyechanzhi(),
-                lastMonth != null ? lastMonth.getGongyechanzhileiji() : null));
-
-        // 其他产值累计
-        current.setQitachanzhileiji(addBigDecimal(
-                current.getQitachanzhi(),
-                lastMonth != null ? lastMonth.getQitachanzhileiji() : null));
-
-        // 新产品价值累计
-        current.setXinchanpinjiazhileiji(addBigDecimal(
-                current.getXinchanpinjiazhi(),
-                lastMonth != null ? lastMonth.getXinchanpinjiazhileiji() : null));
-
-        // 工业销售产值累计
-        current.setGyxsczhejileiji(addBigDecimal(
-                current.getGyxsczheji(),
-                lastMonth != null ? lastMonth.getGyxsczhejileiji() : null));
-
-        // 出口交货值累计
-        current.setChukoujiaohuozhileiji(addBigDecimal(
-                current.getChukoujiaohuozhi(),
-                lastMonth != null ? lastMonth.getChukoujiaohuozhileiji() : null));
-
-        // 企业用电量累计
-        current.setQiyeyongdianliangleiji(addLong(
-                current.getQiyeyongdianliang(),
-                lastMonth != null ? lastMonth.getQiyeyongdianliangleiji() : null));
-
-        // 固定资产投资累计
-        current.setGdzctzhejileiji(addBigDecimal(
-                current.getGdzctzheji(),
-                lastMonth != null ? lastMonth.getGdzctzhejileiji() : null));
-
-        // 技术改造累计
-        current.setJishugaizaoleiji(addBigDecimal(
-                current.getJishugaizao(),
-                lastMonth != null ? lastMonth.getJishugaizaoleiji() : null));
-
-        // 主要产品产量累计
-        current.setYuanmeileiji(addLong(current.getYuanmei(), lastMonth != null ? lastMonth.getYuanmeileiji() : null));
-        current.setJingmeileiji(addLong(current.getJingmei(), lastMonth != null ? lastMonth.getJingmeileiji() : null));
-        current.setNiaosuleiji(addLong(current.getNiaosu(), lastMonth != null ? lastMonth.getNiaosuleiji() : null));
-        current.setJiachunleiji(addLong(current.getJiachun(), lastMonth != null ? lastMonth.getJiachunleiji() : null));
-        current.setCusuanleiji(addLong(current.getCusuan(), lastMonth != null ? lastMonth.getCusuanleiji() : null));
-        current.setJiaotanleiji(addLong(current.getJiaotan(), lastMonth != null ? lastMonth.getJiaotanleiji() : null));
-        current.setCusuanyizhileiji(
-                addLong(current.getCusuanyizhi(), lastMonth != null ? lastMonth.getCusuanyizhileiji() : null));
-        current.setCusuandingzhileiji(
-                addLong(current.getCusuandingzhi(), lastMonth != null ? lastMonth.getCusuandingzhileiji() : null));
-        current.setCuganleiji(addLong(current.getCugan(), lastMonth != null ? lastMonth.getCuganleiji() : null));
-        current.setTansuanerjiazhileiji(
-                addLong(current.getTansuanerjiazhi(), lastMonth != null ? lastMonth.getTansuanerjiazhileiji() : null));
-        current.setHechenganleiji(
-                addLong(current.getHechengan(), lastMonth != null ? lastMonth.getHechenganleiji() : null));
-        current.setDingchunleiji(
-                addLong(current.getDingchun(), lastMonth != null ? lastMonth.getDingchunleiji() : null));
-        current.setJujiaquanleiji(
-                addLong(current.getJujiaquan(), lastMonth != null ? lastMonth.getJujiaquanleiji() : null));
-        current.setGaizhiliqingleiji(
-                addLong(current.getGaizhiliqing(), lastMonth != null ? lastMonth.getGaizhiliqingleiji() : null));
-        current.setEnyouleiji(addLong(current.getEnyou(), lastMonth != null ? lastMonth.getEnyouleiji() : null));
-        current.setFuhefeileiji(addLong(current.getFuhefei(), lastMonth != null ? lastMonth.getFuhefeileiji() : null));
-        current.setLvdingleiji(addLong(current.getLvding(), lastMonth != null ? lastMonth.getLvdingleiji() : null));
-        current.setTansuzhipinleiji(
-                addLong(current.getTansuzhipin(), lastMonth != null ? lastMonth.getTansuzhipinleiji() : null));
-        current.setLvzhucaileiji(
-                addLong(current.getLvzhucai(), lastMonth != null ? lastMonth.getLvzhucaileiji() : null));
-        current.setLvjiyacaileiji(
-                addLong(current.getLvjiyacai(), lastMonth != null ? lastMonth.getLvjiyacaileiji() : null));
-        current.setFadianliangleiji(
-                addLong(current.getFadianliang(), lastMonth != null ? lastMonth.getFadianliangleiji() : null));
-        current.setPidaiyunshujileiji(
-                addLong(current.getPidaiyunshuji(), lastMonth != null ? lastMonth.getPidaiyunshujileiji() : null));
-        current.setShusongdaileiji(
-                addLong(current.getShusongdai(), lastMonth != null ? lastMonth.getShusongdaileiji() : null));
-        current.setDianlanleiji(addLong(current.getDianlan(), lastMonth != null ? lastMonth.getDianlanleiji() : null));
-        current.setYeyazhijialeiji(
-                addLong(current.getYeyazhijia(), lastMonth != null ? lastMonth.getYeyazhijialeiji() : null));
-        current.setGuabanyunshujileiji(
-                addLong(current.getGuabanyunshuji(), lastMonth != null ? lastMonth.getGuabanyunshujileiji() : null));
-        current.setGaolingtuleiji(
-                addLong(current.getGaolingtu(), lastMonth != null ? lastMonth.getGaolingtuleiji() : null));
-        current.setQingchaiiyouleiji(
-                addLong(current.getQingchaiyou(), lastMonth != null ? lastMonth.getQingchaiiyouleiji() : null));
-        current.setZhongchaiyouleiji(
-                addLong(current.getZhongchaiyou(), lastMonth != null ? lastMonth.getZhongchaiyouleiji() : null));
-        current.setShinaoyouleiji(
-                addLong(current.getShinaoyou(), lastMonth != null ? lastMonth.getShinaoyouleiji() : null));
-        current.setYehuashiyouqileiji(
-                addLong(current.getYehuashiyouqi(), lastMonth != null ? lastMonth.getYehuashiyouqileiji() : null));
-        current.setLiuhuangleiji(
-                addLong(current.getLiuhuang(), lastMonth != null ? lastMonth.getLiuhuangleiji() : null));
-        current.setLiuhuanganleiji(
-                addLong(current.getLiuhuangan(), lastMonth != null ? lastMonth.getLiuhuanganleiji() : null));
-        current.setQitachanpinleiji(
-                addLong(current.getQitachanpin(), lastMonth != null ? lastMonth.getQitachanpinleiji() : null));
-    }
-
-    /**
-     * BigDecimal加法，处理null
-     */
-    private BigDecimal addBigDecimal(BigDecimal current, BigDecimal lastCumulative) {
-        BigDecimal c = current != null ? current : BigDecimal.ZERO;
-        BigDecimal l = lastCumulative != null ? lastCumulative : BigDecimal.ZERO;
-        return c.add(l);
-    }
-
-    /**
-     * Long加法，处理null
-     */
-    private Long addLong(Long current, Long lastCumulative) {
-        long c = current != null ? current : 0L;
-        long l = lastCumulative != null ? lastCumulative : 0L;
-        return c + l;
+        CumulativeUtils.calculateCumulative(current, lastMonth);
     }
 
     /**
@@ -936,15 +781,16 @@ public class TouZiKuaiBaoService {
     }
 
     /**
-     * 删除记录（仅允许删除待上报的）
+     * 删除记录（仅允许删除待上报或返回修改的）
      */
     public boolean deleteReport(Long id) {
         TongjiCzcptouzikuaibao report = tongjiMapper.selectById(id);
         if (report == null) {
             return false;
         }
-        // 检查状态，只有待上报的才能删除
-        if ("已上报".equals(report.getZhuangtai())) {
+        // 检查状态，只有待上报或返回修改的才能删除
+        String status = report.getZhuangtai();
+        if (!"待上报".equals(status) && !"返回修改".equals(status) && status != null) {
             return false;
         }
         tongjiMapper.deleteById(id);
@@ -953,13 +799,21 @@ public class TouZiKuaiBaoService {
 
     /**
      * 上报记录
+     * 根据单位层级计算审批级别，设置状态为"待审批N"
      */
     public boolean submitReport(Long id) {
         TongjiCzcptouzikuaibao report = tongjiMapper.selectById(id);
         if (report == null) {
             return false;
         }
-        report.setZhuangtai("已上报");
+        // 检查当前状态，只有"待上报"或"返回修改"状态可以上报
+        String status = report.getZhuangtai();
+        if (!"待上报".equals(status) && !"返回修改".equals(status)) {
+            return false;
+        }
+        // 计算审批层级
+        int approvalLevel = calculateApprovalLevel(report.getDanweiid());
+        report.setZhuangtai("待审批" + approvalLevel);
         tongjiMapper.updateById(report);
         return true;
     }
@@ -976,5 +830,237 @@ public class TouZiKuaiBaoService {
             wrapper.ne("ID", excludeId);
         }
         return tongjiMapper.selectCount(wrapper) > 0;
+    }
+
+    // ==================== 审批流程相关方法 ====================
+
+    /**
+     * 计算单位的审批层级
+     * 从煤业公司(ID=2)开始计算深度，然后减1
+     * 例如：煤矿(深度2) -> 待审批1
+     *
+     * @param danweiId 单位ID
+     * @return 审批层级 (1=待审批1, 2=待审批2, ...)
+     */
+    public int calculateApprovalLevel(Integer danweiId) {
+        int depth = 0;
+        Integer currentId = danweiId;
+
+        // 向上遍历直到兖矿集团(id=1)，每级计数+1
+        while (currentId != null && currentId != YANKUANG_JITUAN_ID && currentId != 0) {
+            Danwei danwei = danweiMapper.selectById(currentId);
+            if (danwei == null) {
+                break;
+            }
+            depth++;
+            currentId = danwei.getShangjidanweiid();
+        }
+
+        // 审批层级 = 遍历深度（最小为1）
+        // 例如：转龙湾→鄂尔多斯→子公司→煤业公司 遍历4次 = 待审批4
+        return Math.max(1, depth);
+    }
+
+    /**
+     * 获取单位层级深度（从煤业公司开始计算）
+     *
+     * @param danweiId 单位ID
+     * @return 层级深度
+     */
+    public int getUnitDepth(Integer danweiId) {
+        int depth = 0;
+        Integer currentId = danweiId;
+
+        while (currentId != null && currentId != MEIYE_GONGSI_ID) {
+            Danwei danwei = danweiMapper.selectById(currentId);
+            if (danwei == null) {
+                break;
+            }
+            depth++;
+            currentId = danwei.getShangjidanweiid();
+        }
+        return depth;
+    }
+
+    /**
+     * 检查操作权限：上级单位可以操作下级记录
+     *
+     * @param operatorDanweiId 操作者单位ID
+     * @param recordDanweiId   记录所属单位ID
+     * @return true=有权限
+     */
+    public boolean canOperateRecord(Integer operatorDanweiId, Integer recordDanweiId) {
+        // 同一单位可以操作
+        if (operatorDanweiId.equals(recordDanweiId)) {
+            return true;
+        }
+
+        // 检查操作者是否是记录单位的上级
+        Integer currentId = recordDanweiId;
+        while (currentId != null) {
+            Danwei danwei = danweiMapper.selectById(currentId);
+            if (danwei == null) {
+                break;
+            }
+            if (danwei.getShangjidanweiid() != null && danwei.getShangjidanweiid().equals(operatorDanweiId)) {
+                return true;
+            }
+            currentId = danwei.getShangjidanweiid();
+        }
+        return false;
+    }
+
+    /**
+     * 审批通过（支持跳级审批，会返回警告信息）
+     *
+     * @param id               记录ID
+     * @param operatorDanweiId 操作者单位ID
+     * @param forceApprove     是否强制审批（跳过下级未审批警告）
+     * @return 操作结果消息
+     */
+    public String approveReport(Long id, Integer operatorDanweiId, boolean forceApprove) {
+        TongjiCzcptouzikuaibao report = tongjiMapper.selectById(id);
+        if (report == null) {
+            return "记录不存在";
+        }
+
+        String currentStatus = report.getZhuangtai();
+        // 检查状态是否为待审批
+        if (currentStatus == null || !currentStatus.startsWith("待审批")) {
+            return "当前状态不可审批";
+        }
+
+        // 获取记录所属单位
+        Integer recordDanweiId = report.getDanweiid();
+
+        // 检查操作权限
+        if (!canOperateRecord(operatorDanweiId, recordDanweiId)) {
+            return "无权限审批此记录";
+        }
+
+        // 找到记录单位的直属上级
+        Danwei recordDanwei = danweiMapper.selectById(recordDanweiId);
+        if (recordDanwei == null) {
+            return "记录单位不存在";
+        }
+        Integer directParentId = recordDanwei.getShangjidanweiid();
+
+        // 如果操作者不是直属上级，需要检查是否跳级
+        if (!operatorDanweiId.equals(directParentId) && !forceApprove) {
+            // 找出中间未审批的单位
+            String pendingUnits = getPendingApprovalUnits(operatorDanweiId, recordDanweiId);
+            if (pendingUnits != null && !pendingUnits.isEmpty()) {
+                return "SKIP_WARNING:" + pendingUnits;
+            }
+        }
+
+        // 解析当前审批级别
+        try {
+            int currentLevel = Integer.parseInt(currentStatus.replace("待审批", ""));
+            if (currentLevel <= 1) {
+                // 最后一级审批，状态变为审批通过
+                report.setZhuangtai("审批通过");
+            } else {
+                // 还有上级需要审批，降低审批级别
+                report.setZhuangtai("待审批" + (currentLevel - 1));
+            }
+            tongjiMapper.updateById(report);
+            return "审批成功";
+        } catch (NumberFormatException e) {
+            return "状态格式错误";
+        }
+    }
+
+    /**
+     * 获取操作者和记录单位之间未审批的单位名称
+     */
+    private String getPendingApprovalUnits(Integer operatorDanweiId, Integer recordDanweiId) {
+        List<String> pendingUnits = new ArrayList<>();
+        Integer currentId = recordDanweiId;
+
+        // 从记录单位向上遍历到操作者单位
+        while (currentId != null && !currentId.equals(operatorDanweiId)) {
+            Danwei danwei = danweiMapper.selectById(currentId);
+            if (danwei == null) {
+                break;
+            }
+            Integer parentId = danwei.getShangjidanweiid();
+            if (parentId != null && !parentId.equals(operatorDanweiId)) {
+                // 这个父级单位还没轮到审批
+                Danwei parentDanwei = danweiMapper.selectById(parentId);
+                if (parentDanwei != null) {
+                    pendingUnits.add(parentDanwei.getMingcheng());
+                }
+            }
+            currentId = parentId;
+        }
+
+        return String.join("、", pendingUnits);
+    }
+
+    /**
+     * 返回修改（上级退回下级记录）
+     *
+     * @param id               记录ID
+     * @param operatorDanweiId 操作者单位ID
+     * @return 操作结果消息
+     */
+    public String returnForModification(Long id, Integer operatorDanweiId) {
+        TongjiCzcptouzikuaibao report = tongjiMapper.selectById(id);
+        if (report == null) {
+            return "记录不存在";
+        }
+
+        // 检查权限
+        if (!canOperateRecord(operatorDanweiId, report.getDanweiid())) {
+            return "无权限退回此记录";
+        }
+
+        String currentStatus = report.getZhuangtai();
+        // 检查状态是否为待审批或审批通过（待上报和返回修改不可退回）
+        if (currentStatus == null || "待上报".equals(currentStatus) || "返回修改".equals(currentStatus)) {
+            return "当前状态不可退回";
+        }
+
+        // 状态改为返回修改
+        report.setZhuangtai("返回修改");
+        tongjiMapper.updateById(report);
+        return "退回成功";
+    }
+
+    /**
+     * 检查记录是否可编辑（待上报或返回修改状态可编辑）
+     *
+     * @param id 记录ID
+     * @return true=可编辑
+     */
+    public boolean canEdit(Long id) {
+        TongjiCzcptouzikuaibao report = tongjiMapper.selectById(id);
+        if (report == null) {
+            return false;
+        }
+        String status = report.getZhuangtai();
+        return "待上报".equals(status) || "返回修改".equals(status);
+    }
+
+    /**
+     * 获取记录的审批状态信息
+     */
+    public Map<String, Object> getApprovalStatus(Long id) {
+        TongjiCzcptouzikuaibao report = tongjiMapper.selectById(id);
+        Map<String, Object> result = new HashMap<>();
+        if (report == null) {
+            result.put("exists", false);
+            return result;
+        }
+
+        result.put("exists", true);
+        result.put("id", report.getId());
+        String status = report.getZhuangtai();
+        result.put("zhuangtai", status);
+        result.put("canEdit", "待上报".equals(status) || "返回修改".equals(status));
+        result.put("canApprove", status != null && status.startsWith("待审批"));
+        result.put("canReturn", status != null && !status.equals("待上报") && !status.equals("返回修改"));
+        return result;
     }
 }

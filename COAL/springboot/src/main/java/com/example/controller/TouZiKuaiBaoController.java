@@ -153,9 +153,10 @@ public class TouZiKuaiBaoController {
         if (existing == null) {
             return Result.error("记录不存在");
         }
-        // 已上报的不能修改
-        if ("已上报".equals(existing.getZhuangtai())) {
-            return Result.error("已上报的记录不能修改");
+        // 只有"待上报"或"返回修改"状态才能修改
+        String status = existing.getZhuangtai();
+        if (!"待上报".equals(status) && !"返回修改".equals(status)) {
+            return Result.error("只有待上报或返回修改状态的记录才能修改");
         }
         // 检查是否会与其他记录冲突
         if (touZiKuaiBaoService.existsRecord(report.getDanweiid(), report.getNianfen(), report.getYuefen(), id)) {
@@ -199,5 +200,66 @@ public class TouZiKuaiBaoController {
     public Result getById(@PathVariable Long id) {
         TongjiCzcptouzikuaibao report = touZiKuaiBaoService.getById(id);
         return Result.success(report);
+    }
+
+    // ==================== 审批流程相关接口 ====================
+
+    /**
+     * 审批通过
+     * 
+     * @param id               记录ID
+     * @param operatorDanweiId 操作者单位ID
+     * @param forceApprove     是否强制审批（跳过下级未审批警告）
+     */
+    @PostMapping("/approve/{id}")
+    public Result approveReport(@PathVariable Long id,
+            @RequestParam Integer operatorDanweiId,
+            @RequestParam(defaultValue = "false") boolean forceApprove) {
+        String result = touZiKuaiBaoService.approveReport(id, operatorDanweiId, forceApprove);
+        if ("审批成功".equals(result)) {
+            return Result.success(result);
+        } else if (result.startsWith("SKIP_WARNING:")) {
+            // 跳级审批警告，返回特殊格式让前端处理
+            String pendingUnits = result.substring("SKIP_WARNING:".length());
+            return Result.error("SKIP_WARNING:" + pendingUnits);
+        } else {
+            return Result.error(result);
+        }
+    }
+
+    /**
+     * 返回修改（退回）
+     * 
+     * @param id               记录ID
+     * @param operatorDanweiId 操作者单位ID
+     */
+    @PostMapping("/return/{id}")
+    public Result returnForModification(@PathVariable Long id, @RequestParam Integer operatorDanweiId) {
+        String result = touZiKuaiBaoService.returnForModification(id, operatorDanweiId);
+        if ("退回成功".equals(result)) {
+            return Result.success(result);
+        } else {
+            return Result.error(result);
+        }
+    }
+
+    /**
+     * 检查操作权限
+     * 
+     * @param operatorDanweiId 操作者单位ID
+     * @param recordDanweiId   记录所属单位ID
+     */
+    @GetMapping("/canOperate")
+    public Result canOperate(@RequestParam Integer operatorDanweiId, @RequestParam Integer recordDanweiId) {
+        boolean canOperate = touZiKuaiBaoService.canOperateRecord(operatorDanweiId, recordDanweiId);
+        return Result.success(canOperate);
+    }
+
+    /**
+     * 获取记录的审批状态信息
+     */
+    @GetMapping("/approvalStatus/{id}")
+    public Result getApprovalStatus(@PathVariable Long id) {
+        return Result.success(touZiKuaiBaoService.getApprovalStatus(id));
     }
 }

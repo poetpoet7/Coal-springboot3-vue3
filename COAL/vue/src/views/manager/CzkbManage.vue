@@ -85,10 +85,13 @@
         :header-cell-style="{background: '#f5f7fa', color: '#606266', textAlign: 'center', fontSize: '12px'}"
       >
         <el-table-column type="selection" width="50" :selectable="canSelect"></el-table-column>
-        <el-table-column label="操作" width="150" fixed>
+        <el-table-column label="操作" width="180" fixed>
           <template v-slot="scope">
-            <el-button size="small" type="primary" @click="handleEdit(scope.row)" :disabled="scope.row.zhuangtai === '已上报'">编辑</el-button>
-            <el-button size="small" type="danger" @click="handleDelete(scope.row)" :disabled="scope.row.zhuangtai === '已上报'">删除</el-button>
+            <el-button size="small" type="primary" @click="handleEdit(scope.row)" :disabled="!canEditRow(scope.row.zhuangtai)">编辑</el-button>
+            <el-button size="small" type="danger" @click="handleDelete(scope.row)" :disabled="!canEditRow(scope.row.zhuangtai)">删除</el-button>
+            <!-- 只有管理员或非基层单位才显示审批和退回按钮 -->
+            <!-- <el-button size="small" type="success" @click="handleApprove(scope.row)" v-if="canApproveRecord(scope.row)" :disabled="!isApproveStatus(scope.row.zhuangtai)">审批</el-button> -->
+            <!-- <el-button size="small" type="warning" @click="handleReturn(scope.row)" v-if="canApproveRecord(scope.row)" :disabled="!canReturnRow(scope.row.zhuangtai)">退回</el-button> -->
           </template>
         </el-table-column>
         <el-table-column prop="yuefen" label="月份" width="80" align="center">
@@ -96,7 +99,7 @@
         </el-table-column>
         <el-table-column prop="zhuangtai" label="状态" width="100" align="center">
           <template v-slot="scope">
-            <el-tag :type="scope.row.zhuangtai === '已上报' ? 'success' : 'warning'">
+            <el-tag :type="getStatusTagType(scope.row.zhuangtai)">
               {{ scope.row.zhuangtai || '待上报' }}
             </el-tag>
           </template>
@@ -651,10 +654,10 @@ const handleBatchSubmit = () => {
     return;
   }
   
-  // 过滤出待上报的记录
-  const pendingRows = selectedRows.value.filter(row => row.zhuangtai !== '已上报');
+// 过滤出待上报或返回修改的记录（这两种状态可以上报）
+  const pendingRows = selectedRows.value.filter(row => row.zhuangtai === '待上报' || row.zhuangtai === '返回修改' || !row.zhuangtai);
   if (pendingRows.length === 0) {
-    ElMessage.warning('选中的记录都已上报');
+    ElMessage.warning('选中的记录都已上报或正在审批中');
     return;
   }
   
@@ -684,9 +687,9 @@ const handleSelectionChange = (selection) => {
   selectedRows.value = selection;
 };
 
-// 判断是否可选择（只有待上报的可以选择）
+// 判断是否可选择（待上报或返回修改可以选择上报）
 const canSelect = (row) => {
-  return row.zhuangtai !== '已上报';
+  return row.zhuangtai === '待上报' || row.zhuangtai === '返回修改' || !row.zhuangtai;
 };
 
 // 确认保存
@@ -763,6 +766,111 @@ const formatLong = (value) => {
   if (value === null || value === undefined || value === 0) return '';
   return Number(value).toLocaleString('zh-CN');
 };
+
+// ==================== 审批流程相关方法 ====================
+
+// 获取状态标签类型
+const getStatusTagType = (status) => {
+  if (!status || status === '待上报') return 'warning';
+  if (status === '审批通过') return 'success';
+  if (status === '返回修改') return 'danger';
+  if (status.startsWith('待审批')) return 'primary';
+  return 'info';
+};
+
+// 判断是否可编辑（待上报或返回修改）
+const canEditRow = (status) => {
+  return status === '待上报' || status === '返回修改' || !status;
+};
+
+// 判断是否可退回（待审批或审批通过才可退回）
+const canReturnRow = (status) => {
+  if (!status) return false;
+  return status.startsWith('待审批') || status === '审批通过';
+};
+
+// 判断是否可审批（待审批状态）
+const isApproveStatus = (status) => {
+  return status && status.startsWith('待审批');
+};
+
+// 判断当前用户是否可以审批该记录（上级可以审批下级）
+const canApproveRecord = (row) => {
+  // 管理员可以审批所有记录
+  if (isAdmin.value) return true;
+  
+  // 非管理员需要检查单位层级关系
+  const currentDanweiId = currentUnitInfo.value?.id;
+  const recordDanweiId = row.danweiid;
+  
+  // 基层单位没有审批权限，不显示按钮
+  if (currentUnitInfo.value?.isBaseUnit) return false;
+  
+  // 同一单位不能审批自己的记录（需要上级审批）
+  if (currentDanweiId === recordDanweiId) return false;
+  
+  // 有下级单位的才能审批
+  return true;
+};
+
+// 处理审批
+const handleApprove = async (row) => {
+  const operatorDanweiId = isAdmin.value ? queryForm.danweiId : currentUnitInfo.value?.id;
+  
+  ElMessageBox.confirm(
+    `确定要审批通过该记录吗？`, 
+    '审批确认', 
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
+    try {
+      const res = await request.post(`/touzikuaibao/approve/${row.id}`, null, {
+        params: { operatorDanweiId }
+      });
+      if (res.code === '200') {
+        ElMessage.success('审批成功');
+        handleQuery();
+      } else {
+        ElMessage.error(res.msg || '审批失败');
+      }
+    } catch (error) {
+      ElMessage.error('审批失败');
+    }
+  }).catch(() => {});
+};
+
+// 处理退回
+const handleReturn = async (row) => {
+  const operatorDanweiId = isAdmin.value ? queryForm.danweiId : currentUnitInfo.value?.id;
+  
+  ElMessageBox.confirm(
+    `确定要退回该记录吗？退回后基层可重新修改。`, 
+    '退回确认', 
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    }
+  ).then(async () => {
+    try {
+      const res = await request.post(`/touzikuaibao/return/${row.id}`, null, {
+        params: { operatorDanweiId }
+      });
+      if (res.code === '200') {
+        ElMessage.success('退回成功');
+        handleQuery();
+      } else {
+        ElMessage.error(res.msg || '退回失败');
+      }
+    } catch (error) {
+      ElMessage.error('退回失败');
+    }
+  }).catch(() => {});
+};
+
 
 onMounted(async () => {
   if (isAdmin.value) {
