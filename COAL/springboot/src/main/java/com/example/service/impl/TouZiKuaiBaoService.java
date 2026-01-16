@@ -1017,13 +1017,13 @@ public class TouZiKuaiBaoService {
         }
 
         String currentStatus = report.getZhuangtai();
-        // 检查状态是否为待审批或审批通过（待上报和返回修改不可退回）
-        if (currentStatus == null || "待上报".equals(currentStatus) || "返回修改".equals(currentStatus)) {
+        // 检查状态是否为待审批或审批通过（待上报不可退回）
+        if (currentStatus == null || "待上报".equals(currentStatus)) {
             return "当前状态不可退回";
         }
 
-        // 状态改为返回修改
-        report.setZhuangtai("返回修改");
+        // 状态改为待上报
+        report.setZhuangtai("待上报");
         tongjiMapper.updateById(report);
         return "退回成功";
     }

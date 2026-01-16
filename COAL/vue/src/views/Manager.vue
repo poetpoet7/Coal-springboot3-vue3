@@ -123,7 +123,28 @@
         ></div>
       </div>
       <div class="manager-main-right">
-        <RouterView @updateUser="updateUser" />
+        <!-- 标签栏 -->
+        <div class="tags-view-container" v-show="tagsList.length > 0">
+          <div
+              v-for="(tag, index) in tagsList"
+              :key="tag.path"
+              class="tags-view-item"
+              :class="{ 'active': tag.path === router.currentRoute.value.path }"
+              @click="handleTabClick(tag)"
+          >
+            <span>{{ tag.title }}</span>
+            <el-icon class="el-icon-close" @click.stop="closeTag(index, tag)">
+              <Close />
+            </el-icon>
+          </div>
+        </div>
+
+        <!-- 内容渲染区，带状态保留 -->
+        <router-view v-slot="{ Component }">
+          <keep-alive>
+            <component :is="Component" :key="router.currentRoute.value.path" @updateUser="updateUser" />
+          </keep-alive>
+        </router-view>
       </div>
     </div>
     <!-- 下面部分结束 -->
@@ -133,14 +154,56 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, onUnmounted } from "vue";
+import { reactive, ref, onMounted, onUnmounted, watch } from "vue";
 import router from "@/router/index.js";
 import { ElMessage } from "element-plus";
+import { Close } from "@element-plus/icons-vue";
 
 const data = reactive({
   //取出来的字符串信息转换为JSON数据
   user: JSON.parse(localStorage.getItem('xm-user') || '{}')
 })
+
+// 标签页列表
+const tagsList = ref([]);
+
+// 监听路由变化，添加标签
+watch(() => router.currentRoute.value.path, (newPath) => {
+  setTags(router.currentRoute.value);
+}, { immediate: true });
+
+function setTags(route) {
+  // 不记录首页、登录页、404等特殊页面
+  if (['/manager/home', '/login', '/404'].includes(route.path) || !route.meta.name) return;
+  
+  const isExist = tagsList.value.some(item => item.path === route.path);
+  if (!isExist) {
+    if (tagsList.value.length >= 10) { // 限制最多打开10个标签，防止性能问题
+      tagsList.value.shift();
+    }
+    tagsList.value.push({
+      title: route.meta.name,
+      path: route.path,
+      name: route.name
+    });
+  }
+}
+
+// 点击标签跳转
+const handleTabClick = (tag) => {
+  router.push(tag.path);
+}
+
+// 关闭标签
+const closeTag = (index, tag) => {
+  tagsList.value.splice(index, 1);
+  const nextTag = tagsList.value[index] || tagsList.value[index - 1];
+  if (nextTag) {
+    tag.path === router.currentRoute.value.path && router.push(nextTag.path);
+  } else {
+    router.push('/manager/home');
+  }
+}
 
 // 侧边栏宽度相关逻辑
 const sidebarWidth = ref(220) // 默认宽度
@@ -181,7 +244,7 @@ const logout = () => {
 // 点击"管理系统"回到首页并刷新
 const goHome = () => {
   router.push('/manager/home').then(() => {
-    location.reload()
+    // location.reload() // 移除刷新，使用标签页跳转更平滑
   })
 }
 

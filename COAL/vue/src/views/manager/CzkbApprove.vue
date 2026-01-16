@@ -23,7 +23,7 @@
             <el-option label="全部" value=""></el-option>
             <el-option label="待审批" value="待审批"></el-option>
             <el-option label="审批通过" value="审批通过"></el-option>
-            <el-option label="返回修改" value="返回修改"></el-option>
+            <el-option label="退回修改" value="退回修改"></el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="单位" v-if="isAdmin">
@@ -67,25 +67,29 @@
       <div class="report-title">产值、主要产品产量及固定资产投资快报 - 审批</div>
       
       <el-table
+        v-loading="loading"
         :data="tableData"
         border
-        stripe
+        highlight-current-row
+        class="premium-table"
         style="width: 100%"
         @selection-change="handleSelectionChange"
-        :header-cell-style="{background: '#f5f7fa', color: '#606266', textAlign: 'center', fontSize: '12px'}"
+        :header-cell-style="{background: '#f8fafc', color: '#334155', textAlign: 'center', fontSize: '13px', fontWeight: 'bold'}"
       >
-        <el-table-column type="selection" width="50" :selectable="canSelect"></el-table-column>
-        <el-table-column label="操作" width="200" fixed>
+        <el-table-column type="selection" width="50" fixed :selectable="canSelect"></el-table-column>
+        <el-table-column label="操作" width="180" fixed align="center">
           <template v-slot="scope">
-            <el-button size="small" type="success" @click="handleApprove(scope.row)" :disabled="!isApproveStatus(scope.row.zhuangtai)">审批</el-button>
-            <el-button size="small" type="warning" @click="handleReturn(scope.row)" :disabled="scope.row.zhuangtai === '待上报' || scope.row.zhuangtai === '返回修改'">退回</el-button>
+            <el-button size="small" type="primary" plain @click="handleApprove(scope.row)" :disabled="!isApproveStatus(scope.row.zhuangtai)">审批</el-button>
+            <el-button size="small" type="danger" plain @click="handleReturn(scope.row)" :disabled="scope.row.zhuangtai === '待上报' || scope.row.zhuangtai === '返回修改'">退回</el-button>
           </template>
         </el-table-column>
-        <el-table-column prop="danweiMingcheng" label="单位" width="150" align="left"></el-table-column>
-        <el-table-column prop="yuefen" label="月份" width="80" align="center">
-          <template v-slot="scope">{{ scope.row.yuefen }}月</template>
+        <el-table-column prop="danweiMingcheng" label="单位名称" width="180" fixed align="left"></el-table-column>
+        <el-table-column prop="yuefen" label="月份" width="80" fixed align="center">
+          <template v-slot="scope">
+            <el-tag size="small" effect="plain">{{ scope.row.yuefen }}月</el-tag>
+          </template>
         </el-table-column>
-        <el-table-column prop="zhuangtai" label="状态" width="100" align="center">
+        <el-table-column prop="zhuangtai" label="状态" width="120" fixed align="center">
           <template v-slot="scope">
             <el-tag :type="getStatusTagType(scope.row.zhuangtai)">
               {{ scope.row.zhuangtai || '待上报' }}
@@ -101,9 +105,135 @@
           <el-table-column prop="gongyechanzhi" label="工业产值(现价)" width="120" align="right">
             <template v-slot="scope">{{ formatNumber(scope.row.gongyechanzhi) }}</template>
           </el-table-column>
-          <el-table-column prop="qitachanzhi" label="其他产值" width="100" align="right">
+          <el-table-column prop="qitachanzhi" label="其他产值、营业额" width="130" align="right">
             <template v-slot="scope">{{ formatNumber(scope.row.qitachanzhi) }}</template>
           </el-table-column>
+        </el-table-column>
+        
+        <!-- 新产品价值 -->
+        <el-table-column prop="xinchanpinjiazhi" label="新产品价值(万元)" width="120" align="right">
+          <template v-slot="scope">{{ formatNumber(scope.row.xinchanpinjiazhi) }}</template>
+        </el-table-column>
+        
+        <!-- 工业销售产值 -->
+        <el-table-column label="工业销售产值(万元)" align="center">
+          <el-table-column prop="gyxsczheji" label="计" width="100" align="right">
+            <template v-slot="scope">{{ formatNumber(scope.row.gyxsczheji) }}</template>
+          </el-table-column>
+          <el-table-column prop="chukoujiaohuozhi" label="其中：出口交货值" width="130" align="right">
+            <template v-slot="scope">{{ formatNumber(scope.row.chukoujiaohuozhi) }}</template>
+          </el-table-column>
+        </el-table-column>
+        
+        <!-- 主要产品产量 -->
+        <el-table-column label="主要产品产量" align="center">
+          <el-table-column prop="yuanmei" label="原煤(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.yuanmei) }}</template>
+          </el-table-column>
+          <el-table-column prop="jingmei" label="精煤(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.jingmei) }}</template>
+          </el-table-column>
+          <el-table-column prop="niaosu" label="尿素(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.niaosu) }}</template>
+          </el-table-column>
+          <el-table-column prop="jiachun" label="甲醇(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.jiachun) }}</template>
+          </el-table-column>
+          <el-table-column prop="cusuan" label="醋酸(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.cusuan) }}</template>
+          </el-table-column>
+          <el-table-column prop="jiaotan" label="焦炭(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.jiaotan) }}</template>
+          </el-table-column>
+          <el-table-column prop="cusuanyizhi" label="醋酸乙酯(吨)" width="120" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.cusuanyizhi) }}</template>
+          </el-table-column>
+          <el-table-column prop="cusuandingzhi" label="醋酸丁酯(吨)" width="120" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.cusuandingzhi) }}</template>
+          </el-table-column>
+          <el-table-column prop="cugan" label="醋酐(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.cugan) }}</template>
+          </el-table-column>
+          <el-table-column prop="tansuanerjiazhi" label="碳酸二甲酯(吨)" width="120" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.tansuanerjiazhi) }}</template>
+          </el-table-column>
+          <el-table-column prop="hechengan" label="合成氨(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.hechengan) }}</template>
+          </el-table-column>
+          <el-table-column prop="dingchun" label="丁醇(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.dingchun) }}</template>
+          </el-table-column>
+          <el-table-column prop="jujiaquan" label="聚甲醛(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.jujiaquan) }}</template>
+          </el-table-column>
+          <el-table-column prop="gaizhiliqing" label="改质沥青(吨)" width="110" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.gaizhiliqing) }}</template>
+          </el-table-column>
+          <el-table-column prop="enyou" label="蒽油(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.enyou) }}</template>
+          </el-table-column>
+          <el-table-column prop="fuhefei" label="复合肥(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.fuhefei) }}</template>
+          </el-table-column>
+          <el-table-column prop="lvding" label="铝锭(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.lvding) }}</template>
+          </el-table-column>
+          <el-table-column prop="tansuzhipin" label="碳素制品(吨)" width="110" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.tansuzhipin) }}</template>
+          </el-table-column>
+          <el-table-column prop="lvzhucai" label="铝铸材(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.lvzhucai) }}</template>
+          </el-table-column>
+          <el-table-column prop="lvjiyacai" label="铝挤压材(吨)" width="110" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.lvjiyacai) }}</template>
+          </el-table-column>
+          <el-table-column prop="fadianliang" label="发电量(万千瓦时)" width="130" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.fadianliang) }}</template>
+          </el-table-column>
+          <el-table-column prop="pidaiyunshuji" label="皮带运输机(台)" width="120" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.pidaiyunshuji) }}</template>
+          </el-table-column>
+          <el-table-column prop="shusongdai" label="输送带(M2)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.shusongdai) }}</template>
+          </el-table-column>
+          <el-table-column prop="dianlan" label="电缆(米)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.dianlan) }}</template>
+          </el-table-column>
+          <el-table-column prop="yeyazhijia" label="液压支架(架)" width="110" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.yeyazhijia) }}</template>
+          </el-table-column>
+          <el-table-column prop="guabanyunshuji" label="刮板运输机(台)" width="120" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.guabanyunshuji) }}</template>
+          </el-table-column>
+          <el-table-column prop="gaolingtu" label="高岭土(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.gaolingtu) }}</template>
+          </el-table-column>
+          <el-table-column prop="qingchaiyou" label="轻柴油(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.qingchaiyou) }}</template>
+          </el-table-column>
+          <el-table-column prop="zhongchaiyou" label="重柴油(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.zhongchaiyou) }}</template>
+          </el-table-column>
+          <el-table-column prop="shinaoyou" label="石脑油(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.shinaoyou) }}</template>
+          </el-table-column>
+          <el-table-column prop="yehuashiyouqi" label="液化石油气" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.yehuashiyouqi) }}</template>
+          </el-table-column>
+          <el-table-column prop="liuhuang" label="硫磺(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.liuhuang) }}</template>
+          </el-table-column>
+          <el-table-column prop="liuhuangan" label="硫酸铵(吨)" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.liuhuangan) }}</template>
+          </el-table-column>
+          <el-table-column prop="qitachanpin" label="其他产品" width="100" align="right">
+            <template v-slot="scope">{{ formatLong(scope.row.qitachanpin) }}</template>
+          </el-table-column>
+        </el-table-column>
+        
+        <!-- 企业用电量(万千瓦时) -->
+        <el-table-column prop="qiyeyongdianliang" label="企业用电量(万千瓦时)" width="160" align="right">
+          <template v-slot="scope">{{ formatLong(scope.row.qiyeyongdianliang) }}</template>
         </el-table-column>
         
         <!-- 固定资产投资(万元) -->
@@ -115,19 +245,9 @@
             <template v-slot="scope">{{ formatNumber(scope.row.jishugaizao) }}</template>
           </el-table-column>
         </el-table-column>
-
-        <!-- 主要产品产量 -->
-        <el-table-column label="主要产品产量" align="center">
-          <el-table-column prop="yuanmei" label="原煤(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.yuanmei) }}</template>
-          </el-table-column>
-          <el-table-column prop="jingmei" label="精煤(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.jingmei) }}</template>
-          </el-table-column>
-        </el-table-column>
       </el-table>
       
-      <el-empty v-if="tableData.length === 0 && queryForm.danweiId" description="暂无待审批的记录"></el-empty>
+      <el-empty v-if="tableData.length === 0 && queryForm.danweiId" :description="getEmptyDescription()"></el-empty>
       <el-empty v-if="!queryForm.danweiId" description="请先选择单位"></el-empty>
     </div>
   </div>
@@ -169,7 +289,10 @@ const queryForm = reactive({
   status: '待审批' // 默认只查看待审批
 });
 
-// 表格数据
+// 加载状态
+const loading = ref(false);
+
+// 表单数据
 const tableData = ref([]);
 const selectedRows = ref([]);
 
@@ -223,12 +346,14 @@ const loadCurrentUnitInfo = async () => {
 };
 
 // 查询数据（查询所有下级单位的记录，含间接下级）
+// 查询
 const handleQuery = async () => {
   if (!queryForm.danweiId) {
-    ElMessage.warning('请先选择单位');
+    tableData.value = [];
     return;
   }
   
+  loading.value = true;
   try {
     // 获取所有单位列表
     const allUnits = await request.get('/touzikuaibao/units');
@@ -294,6 +419,8 @@ const handleQuery = async () => {
     
   } catch (error) {
     ElMessage.error('查询失败');
+  } finally {
+    loading.value = false;
   }
 };
 
@@ -321,6 +448,15 @@ const getStatusTagType = (status) => {
   if (status === '返回修改') return 'danger';
   if (status.startsWith('待审批')) return 'primary';
   return 'info';
+};
+
+// 获取空数据提示文字
+const getEmptyDescription = () => {
+  const status = queryForm.status;
+  if (status === '待审批') return '暂无待审批的记录';
+  if (status === '审批通过') return '暂无审批通过的记录';
+  if (status === '退回修改') return '暂无退回修改的记录';
+  return '暂无记录';
 };
 
 // 判断是否可审批（待审批状态）

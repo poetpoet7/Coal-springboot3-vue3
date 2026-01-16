@@ -77,27 +77,28 @@
       <div class="report-title">产值、主要产品产量及固定资产投资快报</div>
       
       <el-table
+        v-loading="loading"
         :data="tableData"
         border
-        stripe
+        highlight-current-row
+        class="premium-table"
         style="width: 100%"
         @selection-change="handleSelectionChange"
-        :header-cell-style="{background: '#f5f7fa', color: '#606266', textAlign: 'center', fontSize: '12px'}"
+        :header-cell-style="{background: '#f8fafc', color: '#334155', textAlign: 'center', fontSize: '13px', fontWeight: 'bold'}"
       >
-        <el-table-column type="selection" width="50" :selectable="canSelect"></el-table-column>
-        <el-table-column label="操作" width="180" fixed>
+        <el-table-column type="selection" width="50" fixed :selectable="canSelect"></el-table-column>
+        <el-table-column label="操作" width="160" fixed align="center">
           <template v-slot="scope">
-            <el-button size="small" type="primary" @click="handleEdit(scope.row)" :disabled="!canEditRow(scope.row.zhuangtai)">编辑</el-button>
-            <el-button size="small" type="danger" @click="handleDelete(scope.row)" :disabled="!canEditRow(scope.row.zhuangtai)">删除</el-button>
-            <!-- 只有管理员或非基层单位才显示审批和退回按钮 -->
-            <!-- <el-button size="small" type="success" @click="handleApprove(scope.row)" v-if="canApproveRecord(scope.row)" :disabled="!isApproveStatus(scope.row.zhuangtai)">审批</el-button> -->
-            <!-- <el-button size="small" type="warning" @click="handleReturn(scope.row)" v-if="canApproveRecord(scope.row)" :disabled="!canReturnRow(scope.row.zhuangtai)">退回</el-button> -->
+            <el-button size="small" type="primary" plain @click="handleEdit(scope.row)" :disabled="!canEditRow(scope.row.zhuangtai)">编辑</el-button>
+            <el-button size="small" type="danger" plain @click="handleDelete(scope.row)" :disabled="!canEditRow(scope.row.zhuangtai)">删除</el-button>
           </template>
         </el-table-column>
-        <el-table-column prop="yuefen" label="月份" width="80" align="center">
-          <template v-slot="scope">{{ scope.row.yuefen }}月</template>
+        <el-table-column prop="yuefen" label="月份" width="80" fixed align="center">
+          <template v-slot="scope">
+            <el-tag size="small" effect="plain">{{ scope.row.yuefen }}月</el-tag>
+          </template>
         </el-table-column>
-        <el-table-column prop="zhuangtai" label="状态" width="100" align="center">
+        <el-table-column prop="zhuangtai" label="状态" width="120" fixed align="center">
           <template v-slot="scope">
             <el-tag :type="getStatusTagType(scope.row.zhuangtai)">
               {{ scope.row.zhuangtai || '待上报' }}
@@ -466,6 +467,9 @@ const queryForm = reactive({
   danweiId: null
 });
 
+// 加载状态
+const loading = ref(false);
+
 // 表格数据
 const tableData = ref([]);
 const selectedRows = ref([]);
@@ -567,6 +571,7 @@ const handleQuery = async () => {
     return;
   }
   
+  loading.value = true;
   try {
     const res = await request.get('/touzikuaibao/list', {
       params: {
@@ -581,6 +586,8 @@ const handleQuery = async () => {
     }
   } catch (error) {
     ElMessage.error('查询失败');
+  } finally {
+    loading.value = false;
   }
 };
 

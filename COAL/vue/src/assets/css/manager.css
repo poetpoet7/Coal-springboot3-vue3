@@ -356,3 +356,109 @@
 :deep(.el-menu-item.is-active .el-icon) {
     color: #0066bc !important;
 }
+
+/* ===== Tags View - 多标签页样式 ===== */
+.tags-view-container {
+    height: 34px;
+    width: 100%;
+    background: #fff;
+    border-bottom: 1px solid #d8dce5;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.12), 0 0 3px 0 rgba(0, 0, 0, 0.04);
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    margin-bottom: 10px;
+}
+
+.tags-view-item {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    height: 26px;
+    border: 1px solid #d8dce5;
+    color: #495060;
+    background: #fff;
+    padding: 0 8px;
+    font-size: 12px;
+    margin-left: 5px;
+    margin-top: 4px;
+    border-radius: 3px;
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+}
+
+.tags-view-item:first-of-type {
+    margin-left: 0;
+}
+
+.tags-view-item:hover {
+    background-color: #f5f7fa;
+}
+
+.tags-view-item.active {
+    background-color: #0066bc;
+    color: #fff;
+    border-color: #0066bc;
+}
+
+.tags-view-item.active::before {
+    content: "";
+    background: #fff;
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    position: relative;
+    margin-right: 5px;
+}
+
+.tags-view-item .el-icon-close {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    text-align: center;
+    transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    margin-left: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tags-view-item .el-icon-close:hover {
+    background-color: #b4bccc;
+    color: #fff;
+}
+
+/* ===== Premium Table - 高级表格样式 ===== */
+.premium-table {
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+.premium-table :deep(.el-table__header-wrapper) th {
+    background-color: #f8fafc !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+}
+
+.premium-table :deep(.el-table__row) {
+    transition: background-color 0.2s ease;
+}
+
+.premium-table :deep(.el-table__row:hover) {
+    background-color: #f1f5f9 !important;
+}
+
+.premium-table :deep(.is-current-row)>td {
+    background-color: #e2e8f0 !important;
+}
+
+/* Card Hover Effect */
+.card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+}
