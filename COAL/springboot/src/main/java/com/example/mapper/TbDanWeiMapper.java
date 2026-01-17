@@ -1,12 +1,12 @@
 package com.example.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.example.entity.Roles;
+import com.example.entity.TbDanWei;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * 角色表 Mapper
+ * 单位表 Mapper
  */
 @Mapper
-public interface RolesMapper extends BaseMapper<Roles> {
+public interface TbDanWeiMapper extends BaseMapper<TbDanWei> {
 }

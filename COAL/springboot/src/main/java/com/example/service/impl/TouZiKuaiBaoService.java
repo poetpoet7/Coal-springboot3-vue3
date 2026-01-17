@@ -32,6 +32,9 @@ public class TouZiKuaiBaoService {
     @Resource
     private TongjiCzcptouzikuaibaoMapper tongjiMapper;
 
+    @Resource
+    private PermissionService permissionService;
+
     // 汉字数字映射
     private static final String[] CHINESE_NUMBERS = { "", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十" };
 
@@ -636,6 +639,18 @@ public class TouZiKuaiBaoService {
      */
     public List<Danwei> getAllUnits() {
         return danweiMapper.selectList(null);
+    }
+
+    /**
+     * 获取用户可访问的单位列表（基于权限过滤）
+     * 委托给 PermissionService 处理
+     * 
+     * @param danweiBianma 用户的单位编码
+     * @param roleid       用户的角色ID（1=管理员，拥有所有权限）
+     * @return 可访问的单位列表
+     */
+    public List<Danwei> getAccessibleUnits(String danweiBianma, Integer roleid) {
+        return permissionService.getAccessibleDanweiList(danweiBianma, roleid);
     }
 
     /**

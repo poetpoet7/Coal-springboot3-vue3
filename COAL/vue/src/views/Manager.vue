@@ -14,8 +14,7 @@
       <div class="manager-header-right">
         <el-dropdown style="cursor: pointer">
           <div style="padding-right: 20px; display: flex; align-items: center">
-            <img style="width: 40px; height: 40px; border-radius: 50%;" :src="data.user.avatar" alt="">
-            <span style="margin-left: 5px; color: white">{{ data.user.name }}</span><el-icon color="#fff"><arrow-down /></el-icon>
+            <span style="color: white">{{ data.user.name }}</span><el-icon color="#fff"><arrow-down /></el-icon>
           </div>
           <template #dropdown>
             <el-dropdown-menu>
@@ -103,8 +102,8 @@
               </el-menu-item>
             </el-sub-menu>
             
-            <!-- 用户管理 -->
-            <el-sub-menu index="user">
+            <!-- 用户管理（仅管理员可见） -->
+            <el-sub-menu index="user" v-if="data.user.roleid === 1">
               <template #title>
                 <el-icon><User /></el-icon>
                 <span>用户管理</span>

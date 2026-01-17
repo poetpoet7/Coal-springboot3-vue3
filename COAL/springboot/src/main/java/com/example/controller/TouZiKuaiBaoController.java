@@ -36,6 +36,19 @@ public class TouZiKuaiBaoController {
     }
 
     /**
+     * 获取用户可访问的单位列表（基于权限过滤）
+     * 管理员返回全部，普通用户返回本单位及下属单位
+     * 
+     * @param danweiBianma 用户的单位编码
+     * @param roleid       用户的角色ID
+     */
+    @GetMapping("/units/accessible")
+    public Result getAccessibleUnits(@RequestParam String danweiBianma, @RequestParam Integer roleid) {
+        List<Danwei> units = touZiKuaiBaoService.getAccessibleUnits(danweiBianma, roleid);
+        return Result.success(units);
+    }
+
+    /**
      * 查询投资快报数据
      * 
      * @param danweiId 单位ID

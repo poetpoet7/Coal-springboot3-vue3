@@ -11,12 +11,13 @@ public class WebConfig implements WebMvcConfigurer {
     @Resource
     private JWTInterceptor jwtInterceptor;
 
-    //配置JWT拦截地址，哪些请求地址要拦截，哪些需要放行
+    // 配置JWT拦截地址，哪些请求地址要拦截，哪些需要放行
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(jwtInterceptor).addPathPatterns("/**")
                 .excludePathPatterns("/")
-                .excludePathPatterns("/login", "/register", "/files/**");
+                .excludePathPatterns("/login", "/register", "/files/**")
+                .excludePathPatterns("/roles/selectAll", "/danwei/selectAll"); // 注册页面需要获取角色和单位列表
     }
 
 }

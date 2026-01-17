@@ -27,7 +27,6 @@ const router = createRouter({
       ]
     },
     { path: '/login', component: () => import('@/views/Login.vue') },
-    { path: '/register', component: () => import('@/views/Register.vue') },
     { path: '/404', component: () => import('@/views/404.vue') },
     //   通配符，对于所有找不到路径的路由都返回404
     { path: '/:pathMatch(.*)', redirect: '/404' }

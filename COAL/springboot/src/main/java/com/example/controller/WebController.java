@@ -2,6 +2,7 @@ package com.example.controller;
 
 import com.example.common.Result;
 import com.example.entity.Account;
+import com.example.entity.UserInfo;
 import com.example.service.UserInfoService;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -31,10 +32,11 @@ public class WebController {
     }
 
     /**
-     * 注册 (根据项目需求进行补全)
+     * 注册新用户（使用userinfo表）
      */
     @PostMapping("/register")
-    public Result register() {
+    public Result register(@RequestBody UserInfo userInfo) {
+        userInfoService.add(userInfo);
         return Result.success();
     }
 

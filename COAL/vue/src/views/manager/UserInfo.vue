@@ -49,8 +49,10 @@
             <el-option v-for="role in data.roles" :key="role.roleid" :label="role.rolename" :value="role.roleid"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item prop="danweibianma" label="单位编码">
-          <el-input v-model="data.form.danweibianma" placeholder="请输入单位编码"></el-input>
+        <el-form-item prop="danweibianma" label="单位">
+          <el-select v-model="data.form.danweibianma" placeholder="请选择单位" filterable style="width: 100%">
+            <el-option v-for="danwei in data.danweiList" :key="danwei.bianMa" :label="danwei.mingCheng" :value="danwei.bianMa"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item prop="usersex" label="性别">
           <el-select v-model="data.form.usersex" placeholder="请选择性别">
@@ -92,7 +94,8 @@ const data = reactive({
   username: null,
   loginname: null,
   ids: [],
-  roles: []
+  roles: [],
+  danweiList: []
 })
 
 // 加载用户列表
@@ -121,6 +124,15 @@ const loadRoles = () => {
   })
 }
 
+// 加载单位列表
+const loadDanweiList = () => {
+  request.get('/danwei/selectAll').then(res => {
+    if (res.code === '200') {
+      data.danweiList = res.data || []
+    }
+  })
+}
+
 const handleAdd = () => {
   data.form = {}
   data.formVisible = true
@@ -130,6 +142,13 @@ const handleEdit = (row) => {
   data.formVisible = true
 }
 const add = () => {
+  // 验证登录名格式：只能是英文字母和数字，必须以字母开头
+  const loginname = data.form.loginname
+  if (!loginname || !/^[a-zA-Z][a-zA-Z0-9]*$/.test(loginname)) {
+    ElMessage.error('登录名只能包含英文字母和数字，且必须以字母开头')
+    return
+  }
+  
   request.post('/userinfo/add', data.form).then(res => {
     if (res.code === '200') {
       ElMessage.success('操作成功')
@@ -202,5 +221,27 @@ const reset = () => {
 onMounted(() => {
   load()
   loadRoles()
+  loadDanweiList()
 })
 </script>
+
+<style scoped>
+/* 修复圆形按钮中图标居中问题 */
+:deep(.el-button.is-circle) {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+}
+
+:deep(.el-button.is-circle .el-icon) {
+  margin: 0 !important;
+  position: static !important;
+  transform: none !important;
+}
+
+:deep(.el-button.is-circle .el-icon svg) {
+  display: block;
+  margin: auto;
+}
+</style>

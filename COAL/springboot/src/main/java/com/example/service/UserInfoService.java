@@ -30,6 +30,12 @@ public class UserInfoService {
      * 新增用户
      */
     public void add(UserInfo userInfo) {
+        // 验证登录名格式：只能是英文字母和数字，必须以字母开头
+        String loginname = userInfo.getLoginname();
+        if (ObjectUtil.isEmpty(loginname) || !loginname.matches("^[a-zA-Z][a-zA-Z0-9]*$")) {
+            throw new CustomException(ResultCodeEnum.PARAM_ERROR);
+        }
+
         // 检查登录名是否已存在
         UserInfo dbUser = userInfoMapper.selectByLoginName(userInfo.getLoginname());
         if (ObjectUtil.isNotNull(dbUser)) {

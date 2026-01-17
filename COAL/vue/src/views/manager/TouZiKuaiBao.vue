@@ -409,11 +409,23 @@ const getCellStyle = ({ row }) => {
   return {};
 };
 
-// 加载单位列表
+// 加载单位列表（基于权限过滤）
 const loadUnits = () => {
-  request.get('/touzikuaibao/units').then(res => {
+  // 获取当前登录用户信息
+  const user = JSON.parse(localStorage.getItem("xm-user") || '{}');
+  const danweibianma = user.danweibianma || '';
+  const roleid = user.roleid || 0;
+
+  // 使用权限过滤接口获取可访问的单位列表
+  request.get('/touzikuaibao/units/accessible', {
+    params: { danweiBianma: danweibianma, roleid: roleid }
+  }).then(res => {
     if (res.code === '200') {
       unitList.value = res.data || [];
+      // 如果列表中只有一个单位，自动选中
+      if (unitList.value.length === 1) {
+        queryForm.danweiId = unitList.value[0].id;
+      }
     }
   });
 };

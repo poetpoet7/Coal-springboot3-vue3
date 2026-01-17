@@ -1,25 +1,20 @@
 <template>
   <div style="width: 50%" class="card">
-    <el-form ref="user" :model="data.user" label-width="70px" style="padding: 20px">
-      <el-form-item prop="avatar" label="头像">
-        <el-upload
-            :action="baseUrl + '/files/upload'"
-            :on-success="handleFileUpload"
-            :show-file-list="false"
-            class="avatar-uploader"
-        >
-          <img v-if="data.user.avatar" :src="data.user.avatar" class="avatar" />
-          <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-        </el-upload>
+    <el-form ref="user" :model="data.user" label-width="80px" style="padding: 20px">
+      <el-form-item prop="loginname" label="登录名">
+        <el-input disabled v-model="data.user.loginname" placeholder="登录名"></el-input>
       </el-form-item>
-      <el-form-item prop="username" label="用户名">
-        <el-input disabled v-model="data.user.username" placeholder="请输入用户名"></el-input>
+      <el-form-item prop="username" label="姓名">
+        <el-input v-model="data.user.username" placeholder="请输入姓名"></el-input>
       </el-form-item>
-      <el-form-item prop="name" label="姓名">
-        <el-input v-model="data.user.name" placeholder="请输入姓名"></el-input>
+      <el-form-item prop="usersex" label="性别">
+        <el-select v-model="data.user.usersex" placeholder="请选择性别" style="width: 100%">
+          <el-option label="男" value="男"></el-option>
+          <el-option label="女" value="女"></el-option>
+        </el-select>
       </el-form-item>
-      <el-form-item prop="phone" label="电话">
-        <el-input v-model="data.user.phone" placeholder="请输入电话"></el-input>
+      <el-form-item prop="telephone" label="电话">
+        <el-input v-model="data.user.telephone" placeholder="请输入电话"></el-input>
       </el-form-item>
       <el-form-item prop="email" label="邮箱">
         <el-input v-model="data.user.email" placeholder="请输入邮箱"></el-input>
@@ -34,62 +29,46 @@
 <script setup>
 import { reactive } from "vue";
 import request from "@/utils/request.js";
-import {ElMessage} from "element-plus";
-
-const baseUrl = import.meta.env.VITE_BASE_URL
+import { ElMessage } from "element-plus";
 
 const data = reactive({
   user: JSON.parse(localStorage.getItem('xm-user') || '{}')
 })
 
-const handleFileUpload = (res) => {
-  data.user.avatar = res.data
-}
-// ①自定义内置触发事件updateUser
+// 自定义内置触发事件 updateUser
 const emit = defineEmits(['updateUser'])
+
 const update = () => {
-  if (data.user.role === 'ADMIN') {
-    request.put('/admin/update', data.user).then(res => {
-      if (res.code === '200') {
-        ElMessage.success('保存成功')
-        localStorage.setItem('xm-user', JSON.stringify(data.user))
-        // ②这里放内置触发事件名称updateUser,然后在 Manager.vue中使用@UpdateUser 自定义,进行同步更新
-        emit('updateUser')
-      } else {
-        ElMessage.error(res.msg)
-      }
-    })
+  // 构建更新数据，使用 userid 作为主键
+  const updateData = {
+    userid: data.user.userid,
+    username: data.user.username,
+    usersex: data.user.usersex,
+    telephone: data.user.telephone,
+    email: data.user.email
   }
+  
+  request.put('/userinfo/update', updateData).then(res => {
+    if (res.code === '200') {
+      ElMessage.success('保存成功')
+      // 更新 localStorage 中的用户信息
+      const storedUser = JSON.parse(localStorage.getItem('xm-user') || '{}')
+      storedUser.username = data.user.username
+      storedUser.usersex = data.user.usersex
+      storedUser.telephone = data.user.telephone
+      storedUser.email = data.user.email
+      // 同时更新 name 字段以兼容显示
+      storedUser.name = data.user.username
+      localStorage.setItem('xm-user', JSON.stringify(storedUser))
+      // 触发事件通知父组件更新用户信息
+      emit('updateUser')
+    } else {
+      ElMessage.error(res.msg)
+    }
+  })
 }
 </script>
 
-<style>
-.avatar-uploader {
-  height: 120px;
-}
-.avatar-uploader .avatar {
-  width: 120px;
-  height: 120px;
-  display: block;
-}
-.avatar-uploader .el-upload {
-  border: 1px dashed var(--el-border-color);
-  border-radius: 6px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: var(--el-transition-duration-fast);
-}
+<style scoped>
 
-.avatar-uploader .el-upload:hover {
-  border-color: var(--el-color-primary);
-}
-
-.el-icon.avatar-uploader-icon {
-  font-size: 28px;
-  color: #8c939d;
-  width: 120px;
-  height: 120px;
-  text-align: center;
-}
 </style>

@@ -54,9 +54,15 @@ const data = reactive({
 const updatePassword = () => {
   formRef.value.validate(valid => {
     if (valid) {
-      request.put('/updatePassword', data.user).then(res => {
+      // 构建请求数据，使用 loginname 作为 username（后端使用 username 查询 loginname 字段）
+      const requestData = {
+        username: data.user.loginname,  // 后端 account.getUsername() 用于查询 loginname
+        password: data.user.password,    // 原密码
+        newPassword: data.user.newPassword  // 新密码
+      }
+      request.put('/updatePassword', requestData).then(res => {
         if (res.code === '200') {
-          ElMessage.success('保存成功')
+          ElMessage.success('密码修改成功，请重新登录')
           logout()
         } else {
           ElMessage.error(res.msg)
