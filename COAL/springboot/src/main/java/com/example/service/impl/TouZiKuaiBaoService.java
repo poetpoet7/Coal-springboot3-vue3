@@ -8,12 +8,7 @@ import com.example.mapper.TongjiCzcptouzikuaibaoMapper;
 import com.example.utils.CumulativeUtils;
 import jakarta.annotation.Resource;
 import lombok.Data;
-import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
-
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
@@ -251,364 +246,250 @@ public class TouZiKuaiBaoService {
     }
 
     /**
-     * 导出Excel - 格式与提供的Excel文件完全一致
+     * 导出Excel - HTML表格格式，与正确版本完全一致
      */
     public byte[] exportExcel(Integer danweiId, Integer nianfen, Integer yuefen, String leibie) throws IOException {
         List<Map<String, Object>> data = getReportData(danweiId, nianfen, yuefen, leibie);
-
-        // 查询选中单位名称
         Danwei selectedUnit = danweiMapper.selectById(danweiId);
         String unitName = selectedUnit != null ? selectedUnit.getMingcheng() : "兖矿集团公司";
-
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("产能投资快报");
-
-        // 创建样式
-        CellStyle titleStyle = workbook.createCellStyle();
-        titleStyle.setAlignment(HorizontalAlignment.CENTER);
-        titleStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        Font titleFont = workbook.createFont();
-        titleFont.setBold(true);
-        titleFont.setFontHeightInPoints((short) 18);
-        titleStyle.setFont(titleFont);
-
-        CellStyle headerStyle = workbook.createCellStyle();
-        headerStyle.setAlignment(HorizontalAlignment.CENTER);
-        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        headerStyle.setBorderTop(BorderStyle.THIN);
-        headerStyle.setBorderBottom(BorderStyle.THIN);
-        headerStyle.setBorderLeft(BorderStyle.THIN);
-        headerStyle.setBorderRight(BorderStyle.THIN);
-        headerStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-        headerStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        Font headerFont = workbook.createFont();
-        headerFont.setBold(true);
-        headerStyle.setFont(headerFont);
-
-        CellStyle dataStyle = workbook.createCellStyle();
-        dataStyle.setAlignment(HorizontalAlignment.RIGHT);
-        dataStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        dataStyle.setBorderTop(BorderStyle.THIN);
-        dataStyle.setBorderBottom(BorderStyle.THIN);
-        dataStyle.setBorderLeft(BorderStyle.THIN);
-        dataStyle.setBorderRight(BorderStyle.THIN);
-
-        CellStyle textStyle = workbook.createCellStyle();
-        textStyle.setAlignment(HorizontalAlignment.LEFT);
-        textStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        textStyle.setBorderTop(BorderStyle.THIN);
-        textStyle.setBorderBottom(BorderStyle.THIN);
-        textStyle.setBorderLeft(BorderStyle.THIN);
-        textStyle.setBorderRight(BorderStyle.THIN);
-
-        CellStyle totalStyle = workbook.createCellStyle();
-        totalStyle.setAlignment(HorizontalAlignment.RIGHT);
-        totalStyle.setVerticalAlignment(VerticalAlignment.CENTER);
-        totalStyle.setBorderTop(BorderStyle.THIN);
-        totalStyle.setBorderBottom(BorderStyle.THIN);
-        totalStyle.setBorderLeft(BorderStyle.THIN);
-        totalStyle.setBorderRight(BorderStyle.THIN);
-        totalStyle.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.getIndex());
-        totalStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        Font boldFont = workbook.createFont();
-        boldFont.setBold(true);
-        totalStyle.setFont(boldFont);
-
-        int rowNum = 0;
-
-        // 第1行：标题
-        Row titleRow = sheet.createRow(rowNum++);
-        titleRow.setHeightInPoints(30);
-        Cell titleCell = titleRow.createCell(0);
-        titleCell.setCellValue("产值、主要产品产量及固定资产投资快报");
-        titleCell.setCellStyle(titleStyle);
-
-        // 第2行：日期和编制单位
-        Row infoRow = sheet.createRow(rowNum++);
-        Cell unitCell = infoRow.createCell(0);
-        unitCell.setCellValue("编制单位：" + unitName);
-        Cell dateCell = infoRow.createCell(10);
-        dateCell.setCellValue(nianfen + "年" + (yuefen != null ? yuefen : 1) + "月（" + leibie + "）");
-
-        rowNum++; // 空行
-
-        // 定义列头 - 与Excel文件完全一致
-        // 总列数计算：2(序号+单位名称) + 3(经营总值) + 1(新产品) + 2(工业销售) + 34(主要产品) + 1(企业用电量) + 2(固定资产)
-        // = 45
-        int totalColumns = 45;
-
-        // 第1行header
-        Row headerRow1 = sheet.createRow(rowNum++);
-        headerRow1.setHeightInPoints(30);
-
-        // 第2行header
-        Row headerRow2 = sheet.createRow(rowNum++);
-        headerRow2.setHeightInPoints(25);
-
-        int colIdx = 0;
-
-        // 空列（序号）- 合并两行
-        Cell cellXh1 = headerRow1.createCell(colIdx);
-        cellXh1.setCellValue("");
-        cellXh1.setCellStyle(headerStyle);
-        Cell cellXh2 = headerRow2.createCell(colIdx);
-        cellXh2.setCellStyle(headerStyle);
-        sheet.addMergedRegion(new CellRangeAddress(rowNum - 2, rowNum - 1, colIdx, colIdx));
-        colIdx++;
-
-        // 单位名称 - 合并两行
-        Cell cellDw1 = headerRow1.createCell(colIdx);
-        cellDw1.setCellValue("单位名称");
-        cellDw1.setCellStyle(headerStyle);
-        Cell cellDw2 = headerRow2.createCell(colIdx);
-        cellDw2.setCellStyle(headerStyle);
-        sheet.addMergedRegion(new CellRangeAddress(rowNum - 2, rowNum - 1, colIdx, colIdx));
-        colIdx++;
-
-        // 经营总值(万元) - 合并3列
-        Cell cellJyzz = headerRow1.createCell(colIdx);
-        cellJyzz.setCellValue("经营总值(万元)");
-        cellJyzz.setCellStyle(headerStyle);
-        headerRow1.createCell(colIdx + 1).setCellStyle(headerStyle);
-        headerRow1.createCell(colIdx + 2).setCellStyle(headerStyle);
-        sheet.addMergedRegion(new CellRangeAddress(rowNum - 2, rowNum - 2, colIdx, colIdx + 2));
-        // 子列
-        headerRow2.createCell(colIdx).setCellValue("计");
-        headerRow2.getCell(colIdx).setCellStyle(headerStyle);
-        headerRow2.createCell(colIdx + 1).setCellValue("工业产值(现价)");
-        headerRow2.getCell(colIdx + 1).setCellStyle(headerStyle);
-        headerRow2.createCell(colIdx + 2).setCellValue("其他产值、营业额");
-        headerRow2.getCell(colIdx + 2).setCellStyle(headerStyle);
-        colIdx += 3;
-
-        // 新产品值价(万元) - 合并两行
-        Cell cellXcp = headerRow1.createCell(colIdx);
-        cellXcp.setCellValue("新产品值价(万元)");
-        cellXcp.setCellStyle(headerStyle);
-        headerRow2.createCell(colIdx).setCellStyle(headerStyle);
-        sheet.addMergedRegion(new CellRangeAddress(rowNum - 2, rowNum - 1, colIdx, colIdx));
-        colIdx++;
-
-        // 工业销售产值(万元) - 合并2列
-        Cell cellGyxs = headerRow1.createCell(colIdx);
-        cellGyxs.setCellValue("工业销售产值（万元）");
-        cellGyxs.setCellStyle(headerStyle);
-        headerRow1.createCell(colIdx + 1).setCellStyle(headerStyle);
-        sheet.addMergedRegion(new CellRangeAddress(rowNum - 2, rowNum - 2, colIdx, colIdx + 1));
-        headerRow2.createCell(colIdx).setCellValue("计");
-        headerRow2.getCell(colIdx).setCellStyle(headerStyle);
-        headerRow2.createCell(colIdx + 1).setCellValue("其中：出口交货值");
-        headerRow2.getCell(colIdx + 1).setCellStyle(headerStyle);
-        colIdx += 2;
-
-        // 主要产品产量 - 34个产品
-        String[] products = {
-                "原煤(吨)", "精煤(吨)", "尿素(吨)", "甲醇(吨)", "醋酸(吨)", "焦炭(吨)",
-                "醋酸乙酯(吨)", "醋酸丁酯(吨)", "醋酐(吨)", "碳酸二甲酯(吨)", "合成氨(吨)",
-                "丁醇(吨)", "聚甲醛(吨)", "改质沥青(吨)", "蒽油(吨)", "复合肥(吨)",
-                "铝锭(吨)", "碳素制品(吨)", "铝铸材(吨)", "铝挤压材(吨)", "发电量(万千瓦时)",
-                "皮带运输机(台)", "输送带(M2)", "电缆(米)", "液压支架(架)", "刮板运输机(台)",
-                "高岭土(吨)", "轻柴油(吨)", "重柴油(吨)", "石脑油(吨)", "液化石油气",
-                "硫磺(吨)", "硫酸铵(吨)", "其他产品"
-        };
-
-        Cell cellZycpcl = headerRow1.createCell(colIdx);
-        cellZycpcl.setCellValue("主要产品产量");
-        cellZycpcl.setCellStyle(headerStyle);
-        // 合并主要产品产量标题
-        for (int i = 1; i < products.length; i++) {
-            headerRow1.createCell(colIdx + i).setCellStyle(headerStyle);
-        }
-        sheet.addMergedRegion(new CellRangeAddress(rowNum - 2, rowNum - 2, colIdx, colIdx + products.length - 1));
-
-        // 产品子列
-        for (int i = 0; i < products.length; i++) {
-            headerRow2.createCell(colIdx + i).setCellValue(products[i]);
-            headerRow2.getCell(colIdx + i).setCellStyle(headerStyle);
-        }
-        colIdx += products.length;
-
-        // 企业用电量(万千瓦时) - 合并两行
-        Cell cellQyydl = headerRow1.createCell(colIdx);
-        cellQyydl.setCellValue("企业用电量(万千瓦时)");
-        cellQyydl.setCellStyle(headerStyle);
-        headerRow2.createCell(colIdx).setCellStyle(headerStyle);
-        sheet.addMergedRegion(new CellRangeAddress(rowNum - 2, rowNum - 1, colIdx, colIdx));
-        colIdx++;
-
-        // 固定资产投资(万元) - 合并2列
-        Cell cellGdzctz = headerRow1.createCell(colIdx);
-        cellGdzctz.setCellValue("固定资产投资（万元）");
-        cellGdzctz.setCellStyle(headerStyle);
-        headerRow1.createCell(colIdx + 1).setCellStyle(headerStyle);
-        sheet.addMergedRegion(new CellRangeAddress(rowNum - 2, rowNum - 2, colIdx, colIdx + 1));
-        headerRow2.createCell(colIdx).setCellValue("合计");
-        headerRow2.getCell(colIdx).setCellStyle(headerStyle);
-        headerRow2.createCell(colIdx + 1).setCellValue("技术改造");
-        headerRow2.getCell(colIdx + 1).setCellStyle(headerStyle);
-
-        // 合并第一行标题
-        sheet.addMergedRegion(new CellRangeAddress(0, 0, 0, totalColumns - 1));
-
-        // 判断是否为累计模式
         boolean isLeiji = "累计".equals(leibie);
 
-        // 填充数据
+        StringBuilder html = new StringBuilder();
+        // 表格开始
+        html.append("<table id=\"infoPlace\" style=\"display: block; font-size: 12px; border-width: 0px 0px 0.5px; border-top-style: initial; border-top-color: initial; border-left-style: initial; border-left-color: white; border-bottom-style: solid; border-bottom-color: black; border-right-style: initial; border-right-color: white; width: 125cm;\" class=\"tbList\" cellpadding=\"0\" cellspacing=\"0\" frame=\"void\">\r\n");
+
+        // ===== thead =====
+        html.append("                <thead>\r\n");
+
+        // 第1行：标题
+        html.append("                    <tr>\r\n");
+        html.append("                        <th colspan=\"45\" nowrap=\"nowrap\" align=\"center\" style=\"font-size: xx-large;border: 0px; \">\r\n");
+        html.append("                            <span id=\"BiaoTi\">产值、主要产品产量及固定资产投资快报</span>\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                    </tr>\r\n");
+
+        // 第2行：编制单位和日期
+        html.append("                    <tr>\r\n");
+        html.append("                        <th colspan=\"2\" nowrap=\"nowrap\" align=\"left\" style=\"border: 0px; font-size: 13px;\">\r\n");
+        html.append("                            <span id=\"DanWei\">编制单位：").append(unitName).append("</span>\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th colspan=\"40\" nowrap=\"nowrap\" align=\"center\" style=\"border: 0px; font-size: 13px;\">\r\n");
+        html.append("                            <span id=\"lbNianYue\">").append(nianfen).append("年").append(yuefen != null ? yuefen : 1).append("月（").append(leibie).append("）</span>\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th colspan=\"1\" nowrap=\"nowrap\" align=\"right\" style=\"border: 0px; font-size: 13px;\">\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                    </tr>\r\n");
+
+        // 第3行：表头第一行（含rowspan和colspan合并）
+        html.append("                    <tr>\r\n");
+        html.append("                        <th rowspan=\"2\" nowrap=\"nowrap\" style=\"height: 2cm;width:0.8cm;border-top:0.03cm solid #000;border-left-width: 0;border-left-color: white;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                            \r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th rowspan=\"2\" nowrap=\"nowrap\" style=\"width:2cm;border-top:0.03cm solid #000;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                            单位名称\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th colspan=\"3\" nowrap=\"nowrap\" style=\"height: 1cm;border-top:0.03cm solid #000;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                           经营总值(万元)\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th rowspan=\"2\" nowrap=\"nowrap\" style=\"width:1cm;border-top:0.03cm solid #000;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                            新产品<br>\r\n");
+        html.append("                            值价<br>\r\n");
+        html.append("                            (万元)\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th colspan=\"2\" nowrap=\"nowrap\" style=\"border-top:0.03cm solid #000;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                          工业销售产值（万元）\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th colspan=\"34\" nowrap=\"nowrap\" style=\"border-top:0.03cm solid #000;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                            主要产品产量\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th rowspan=\"2\" nowrap=\"nowrap\" style=\"height: 1cm; width:1cm;border-top:0.03cm solid #000;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                            企业用电量<br>（万千瓦时）\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th colspan=\"2\" nowrap=\"nowrap\" style=\"border-top:0.03cm solid #000;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                            固定资产投资（万元）\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                       \r\n");
+        html.append("                    </tr>\r\n");
+
+        // 第4行：表头第二行（子列）
+        html.append("                    <tr>\r\n");
+        // 经营总值子列
+        html.append("                        <th nowrap=\"nowrap\" style=\"width:1.3cm;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                           计\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th nowrap=\"nowrap\" style=\"width:1.5cm;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                            工业产值<br>\r\n");
+        html.append("                            （现价）\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th nowrap=\"nowrap\" style=\"width:1.3cm;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                            其他产值、<br>\r\n");
+        html.append("                            营业额\r\n");
+        html.append("                        </th>\r\n");
+        // 工业销售产值子列
+        html.append("                        <th nowrap=\"nowrap\" style=\"width:1.1cm;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                           计\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th nowrap=\"nowrap\" style=\"width:1.1cm;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                            其中：出口<br>\r\n");
+        html.append("                            交货值\r\n");
+        html.append("                        </th>\r\n");
+
+        // 34个产品子列
+        appendProductHeader(html, "1.5cm", "原煤<br>\r\n                            （吨）");
+        appendProductHeader(html, "1.5cm", "精煤<br>\r\n                            （吨）");
+        appendProductHeader(html, "1.1cm", "尿素<br>\r\n                            （吨）");
+        appendProductHeader(html, "1.1cm", "甲醇<br>\r\n                            （吨）");
+        appendProductHeader(html, "1.1cm", "醋酸<br>\r\n                            （吨）");
+        appendProductHeader(html, "1.1cm", "焦炭<br>\r\n                              （吨）");
+        appendProductHeader(html, "1.1cm", "醋酸<br>\r\n                            乙酯<br>\r\n                            （吨）");
+        appendProductHeader(html, "1.1cm", "醋酸<br>\r\n                            丁酯<br>\r\n                            （吨）");
+        appendProductHeader(html, "1.1cm", "醋酐<br>\r\n                            （吨）");
+        appendProductHeader(html, "1.1cm", "碳酸<br>\r\n                             二甲<br>\r\n                             酯（吨）");
+        appendProductHeader(html, "1.1cm", "合成<br>\r\n                            氨（吨）");
+        appendProductHeader(html, "1.1cm", "丁醇<br>\r\n                              （吨）");
+        appendProductHeader(html, "1.1cm", "聚甲<br>\r\n                             醛<br>\r\n                             （吨）");
+        appendProductHeader(html, "1.1cm", "改质<br>\r\n                            沥青<br>\r\n                            （吨）");
+        appendProductHeader(html, "1.1cm", "蒽油\r\n                            （吨）");
+        appendProductHeader(html, "1.1cm", "复合<br>\r\n                            肥（吨）");
+        appendProductHeader(html, "1.1cm", "铝锭<br>\r\n                            （吨）");
+        appendProductHeader(html, "1.1cm", "碳素<br>\r\n                              制品（吨）");
+        appendProductHeader(html, "1.1cm", "铝铸<br>\r\n                            材（吨）");
+        appendProductHeader(html, "1.1cm", "铝挤<br>\r\n                            压材<br>\r\n                            （吨）");
+        appendProductHeader(html, "1.1cm", "发电量<br>\r\n                            （万千<br>\r\n                            瓦时）");
+        appendProductHeader(html, "1.1cm", "皮带<br>\r\n                             运输<br>\r\n                             机（台）");
+        appendProductHeader(html, "1.1cm", "输送<br>\r\n                            带（<br>\r\n                            M2）");
+        appendProductHeader(html, "1.1cm", "电缆<br>\r\n                              （米）");
+        appendProductHeader(html, "1.1cm", "液压<br>\r\n                            支架<br>\r\n                            （架）");
+        appendProductHeader(html, "1.1cm", "刮板<br>\r\n                             运输<br>\r\n                             机（台）");
+        appendProductHeader(html, "1.1cm", "高岭<br>\r\n                            土（吨）");
+        html.append("                        \r\n");
+        appendProductHeader(html, "1.1cm", "轻柴<br>\r\n                            油（吨）");
+        appendProductHeader(html, "1.1cm", "重柴<br>\r\n                            油（吨）");
+        appendProductHeader(html, "1.1cm", "石脑<br>\r\n                            油（吨）");
+        appendProductHeader(html, "1.1cm", "液化<br>\r\n                            石油气");
+        appendProductHeader(html, "1.1cm", "硫磺<br>\r\n                            （吨）");
+        appendProductHeader(html, "1.1cm", "硫酸<br>\r\n                            铵（吨）");
+        appendProductHeader(html, "1.1cm", "其他<br>\r\n                            产品");
+
+        // 固定资产投资子列
+        html.append("\r\n");
+        html.append("                         <th nowrap=\"nowrap\" style=\"width:1.1cm;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                            合计\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                        <th nowrap=\"nowrap\" style=\"width:1.1cm;border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                            技术<br>\r\n");
+        html.append("                            改造\r\n");
+        html.append("                        </th>\r\n");
+        html.append("                    </tr>\r\n");
+        html.append("                </thead>\r\n");
+
+        // ===== tbody =====
+        html.append("                <tbody id=\"infoList\">\r\n");
+
         for (Map<String, Object> row : data) {
-            Row dataRow = sheet.createRow(rowNum++);
             TongjiCzcptouzikuaibao t = (TongjiCzcptouzikuaibao) row.get("data");
-            boolean isTotal = row.get("isTotal") != null && (Boolean) row.get("isTotal");
-            CellStyle currentStyle = isTotal ? totalStyle : dataStyle;
-            CellStyle currentTextStyle = isTotal ? totalStyle : textStyle;
+            String xuhao = row.get("xuhao") != null ? row.get("xuhao").toString() : "";
+            String mingcheng = row.get("danweiMingcheng").toString();
 
-            colIdx = 0;
+            html.append("<tr style=\"background-color: rgb(255, 255, 255);\">");
 
-            // 序号
-            Cell cellXuhao = dataRow.createCell(colIdx++);
-            cellXuhao.setCellValue(row.get("xuhao").toString());
-            cellXuhao.setCellStyle(currentTextStyle);
-
+            // 序号（无左边框）
+            html.append("<td align=\"center\" style=\"height:0.7cm;border-bottom: 0.03cm solid black;border-left-width: 0;border-left-color: white;\">").append(xuhao).append("</td>");
             // 单位名称
-            Cell cellName = dataRow.createCell(colIdx++);
-            cellName.setCellValue(row.get("danweiMingcheng").toString());
-            cellName.setCellStyle(currentTextStyle);
-
-            // 经营总值 - 计
-            dataRow.createCell(colIdx).setCellValue(
-                    getDecimalValue(isLeiji ? t.getJingyingzongzhihejileiji() : t.getJingyingzongzhiheji()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            // 经营总值 - 工业产值(现价)
-            dataRow.createCell(colIdx)
-                    .setCellValue(getDecimalValue(isLeiji ? t.getGongyechanzhileiji() : t.getGongyechanzhi()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            // 经营总值 - 其他产值
-            dataRow.createCell(colIdx)
-                    .setCellValue(getDecimalValue(isLeiji ? t.getQitachanzhileiji() : t.getQitachanzhi()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-
+            appendDataCell(html, mingcheng);
+            // 经营总值
+            appendDataCell(html, fmtDec(isLeiji ? t.getJingyingzongzhihejileiji() : t.getJingyingzongzhiheji()));
+            appendDataCell(html, fmtDec(isLeiji ? t.getGongyechanzhileiji() : t.getGongyechanzhi()));
+            appendDataCell(html, fmtDec(isLeiji ? t.getQitachanzhileiji() : t.getQitachanzhi()));
             // 新产品值价
-            dataRow.createCell(colIdx)
-                    .setCellValue(getDecimalValue(isLeiji ? t.getXinchanpinjiazhileiji() : t.getXinchanpinjiazhi()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
+            appendDataCell(html, fmtDec(isLeiji ? t.getXinchanpinjiazhileiji() : t.getXinchanpinjiazhi()));
+            // 工业销售产值
+            appendDataCell(html, fmtDec(isLeiji ? t.getGyxsczhejileiji() : t.getGyxsczheji()));
+            appendDataCell(html, fmtDec(isLeiji ? t.getChukoujiaohuozhileiji() : t.getChukoujiaohuozhi()));
 
-            // 工业销售产值 - 计
-            dataRow.createCell(colIdx)
-                    .setCellValue(getDecimalValue(isLeiji ? t.getGyxsczhejileiji() : t.getGyxsczheji()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            // 工业销售产值 - 出口交货值
-            dataRow.createCell(colIdx)
-                    .setCellValue(getDecimalValue(isLeiji ? t.getChukoujiaohuozhileiji() : t.getChukoujiaohuozhi()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-
-            // 主要产品产量 - 34个产品
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getYuanmeileiji() : t.getYuanmei()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getJingmeileiji() : t.getJingmei()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getNiaosuleiji() : t.getNiaosu()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getJiachunleiji() : t.getJiachun()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getCusuanleiji() : t.getCusuan()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getJiaotanleiji() : t.getJiaotan()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getCusuanyizhileiji() : t.getCusuanyizhi()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getCusuandingzhileiji() : t.getCusuandingzhi()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getCuganleiji() : t.getCugan()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getTansuanerjiazhileiji() : t.getTansuanerjiazhi()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getHechenganleiji() : t.getHechengan()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getDingchunleiji() : t.getDingchun()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getJujiaquanleiji() : t.getJujiaquan()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getGaizhiliqingleiji() : t.getGaizhiliqing()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getEnyouleiji() : t.getEnyou()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getFuhefeileiji() : t.getFuhefei()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getLvdingleiji() : t.getLvding()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getTansuzhipinleiji() : t.getTansuzhipin()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getLvzhucaileiji() : t.getLvzhucai()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getLvjiyacaileiji() : t.getLvjiyacai()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getFadianliangleiji() : t.getFadianliang()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getPidaiyunshujileiji() : t.getPidaiyunshuji()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getShusongdaileiji() : t.getShusongdai()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getDianlanleiji() : t.getDianlan()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getYeyazhijialeiji() : t.getYeyazhijia()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getGuabanyunshujileiji() : t.getGuabanyunshuji()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getGaolingtuleiji() : t.getGaolingtu()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getQingchaiiyouleiji() : t.getQingchaiyou()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getZhongchaiyouleiji() : t.getZhongchaiyou()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getShinaoyouleiji() : t.getShinaoyou()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getYehuashiyouqileiji() : t.getYehuashiyouqi()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getLiuhuangleiji() : t.getLiuhuang()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx).setCellValue(getLongValue(isLeiji ? t.getLiuhuanganleiji() : t.getLiuhuangan()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getQitachanpinleiji() : t.getQitachanpin()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
+            // 34个产品
+            appendDataCell(html, fmtLng(isLeiji ? t.getYuanmeileiji() : t.getYuanmei()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getJingmeileiji() : t.getJingmei()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getNiaosuleiji() : t.getNiaosu()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getJiachunleiji() : t.getJiachun()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getCusuanleiji() : t.getCusuan()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getJiaotanleiji() : t.getJiaotan()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getCusuanyizhileiji() : t.getCusuanyizhi()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getCusuandingzhileiji() : t.getCusuandingzhi()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getCuganleiji() : t.getCugan()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getTansuanerjiazhileiji() : t.getTansuanerjiazhi()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getHechenganleiji() : t.getHechengan()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getDingchunleiji() : t.getDingchun()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getJujiaquanleiji() : t.getJujiaquan()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getGaizhiliqingleiji() : t.getGaizhiliqing()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getEnyouleiji() : t.getEnyou()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getFuhefeileiji() : t.getFuhefei()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getLvdingleiji() : t.getLvding()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getTansuzhipinleiji() : t.getTansuzhipin()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getLvzhucaileiji() : t.getLvzhucai()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getLvjiyacaileiji() : t.getLvjiyacai()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getFadianliangleiji() : t.getFadianliang()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getPidaiyunshujileiji() : t.getPidaiyunshuji()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getShusongdaileiji() : t.getShusongdai()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getDianlanleiji() : t.getDianlan()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getYeyazhijialeiji() : t.getYeyazhijia()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getGuabanyunshujileiji() : t.getGuabanyunshuji()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getGaolingtuleiji() : t.getGaolingtu()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getQingchaiiyouleiji() : t.getQingchaiyou()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getZhongchaiyouleiji() : t.getZhongchaiyou()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getShinaoyouleiji() : t.getShinaoyou()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getYehuashiyouqileiji() : t.getYehuashiyouqi()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getLiuhuangleiji() : t.getLiuhuang()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getLiuhuanganleiji() : t.getLiuhuangan()));
+            appendDataCell(html, fmtLng(isLeiji ? t.getQitachanpinleiji() : t.getQitachanpin()));
 
             // 企业用电量
-            dataRow.createCell(colIdx)
-                    .setCellValue(getLongValue(isLeiji ? t.getQiyeyongdianliangleiji() : t.getQiyeyongdianliang()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
+            appendDataCell(html, fmtLng(isLeiji ? t.getQiyeyongdianliangleiji() : t.getQiyeyongdianliang()));
+            // 固定资产投资
+            appendDataCell(html, fmtDec(isLeiji ? t.getGdzctzhejileiji() : t.getGdzctzheji()));
+            appendDataCell(html, fmtDec(isLeiji ? t.getJishugaizaoleiji() : t.getJishugaizao()));
 
-            // 固定资产投资 - 合计
-            dataRow.createCell(colIdx)
-                    .setCellValue(getDecimalValue(isLeiji ? t.getGdzctzhejileiji() : t.getGdzctzheji()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
-            // 固定资产投资 - 技术改造
-            dataRow.createCell(colIdx)
-                    .setCellValue(getDecimalValue(isLeiji ? t.getJishugaizaoleiji() : t.getJishugaizao()));
-            dataRow.getCell(colIdx++).setCellStyle(currentStyle);
+            html.append("</tr>");
         }
 
-        // 设置列宽
-        sheet.setColumnWidth(0, 8 * 256); // 序号
-        sheet.setColumnWidth(1, 20 * 256); // 单位名称
-        for (int i = 2; i < totalColumns; i++) {
-            sheet.setColumnWidth(i, 12 * 256);
-        }
+        html.append("\r\n                </tbody>\r\n");
+        html.append("            </table>");
 
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        workbook.write(outputStream);
-        workbook.close();
+        return html.toString().getBytes("UTF-8");
+    }
 
-        return outputStream.toByteArray();
+    /**
+     * 添加产品表头单元格
+     */
+    private void appendProductHeader(StringBuilder html, String width, String content) {
+        html.append("                        <th nowrap=\"nowrap\" style=\"width:").append(width)
+            .append(";border-left: 0.03cm solid black;border-bottom: 0.03cm solid black;\">\r\n");
+        html.append("                            ").append(content).append("\r\n");
+        html.append("                        </th>\r\n");
+    }
+
+    /**
+     * 添加数据单元格（居中对齐，带左边框和下边框）
+     */
+    private void appendDataCell(StringBuilder html, String value) {
+        html.append("<td align=\"center\" style=\"height:0.7cm;border-bottom: 0.03cm solid black;border-left: 0.03cm solid black;\">")
+            .append(value != null ? value : "").append("</td>");
+    }
+
+    /**
+     * BigDecimal格式化：null或0显示为空
+     */
+    private String fmtDec(BigDecimal value) {
+        if (value == null || value.compareTo(BigDecimal.ZERO) == 0) return "";
+        return value.stripTrailingZeros().toPlainString();
+    }
+
+    /**
+     * Long格式化：null或0显示为空
+     */
+    private String fmtLng(Long value) {
+        if (value == null || value == 0) return "";
+        return String.valueOf(value);
     }
 
     /**
@@ -653,19 +534,7 @@ public class TouZiKuaiBaoService {
         return permissionService.getAccessibleDanweiList(danweiBianma, roleid);
     }
 
-    /**
-     * BigDecimal转Double，处理null
-     */
-    private double getDecimalValue(BigDecimal value) {
-        return value != null ? value.doubleValue() : 0.0;
-    }
 
-    /**
-     * Long转double，处理null
-     */
-    private double getLongValue(Long value) {
-        return value != null ? value.doubleValue() : 0.0;
-    }
 
     // ==================== 基层单位填报功能 ====================
 

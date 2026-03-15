@@ -67,7 +67,7 @@ public class TouZiKuaiBaoController {
 
     /**
      * 导出Excel
-     * 文件名格式：{年}年{月}月产值、主要产品产量及固定资产投资快报({本月/累计}）.xlsx
+     * 文件名格式：{年}年{月}月产值、主要产品产量及固定资产投资快报({本月/累计}）.xls
      */
     @GetMapping("/export")
     public ResponseEntity<byte[]> exportExcel(@RequestParam Integer danweiId,
@@ -77,10 +77,10 @@ public class TouZiKuaiBaoController {
         try {
             byte[] excelData = touZiKuaiBaoService.exportExcel(danweiId, nianfen, yuefen, leibie);
 
-            // 构建文件名，格式与Excel文件一致
-            // 例如：2025年5月产值、主要产品产量及固定资产投资快报(本月）.xlsx
+            // 构建文件名，格式与正确版本一致
+            // 例如：2025年3月产值、主要产品产量及固定资产投资快报(本月）.xls
             String fileName = nianfen + "年" + (yuefen != null ? yuefen : 1) + "月产值、主要产品产量及固定资产投资快报(" + leibie
-                    + "）.xlsx";
+                    + "）.xls";
             // URL编码中文文件名
             String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8)
                     .replaceAll("\\+", "%20");
