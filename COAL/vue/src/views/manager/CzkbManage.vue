@@ -679,7 +679,9 @@ const handleBatchSubmit = () => {
   ).then(async () => {
     let successCount = 0;
     for (const row of pendingRows) {
-      const res = await request.post(`/touzikuaibao/submit/${row.id}`);
+      const res = await request.post(`/touzikuaibao/submit/${row.id}`, null, {
+        params: { operatorId: user.id }
+      });
       if (res.code === '200') {
         successCount++;
       }
@@ -835,7 +837,7 @@ const handleApprove = async (row) => {
   ).then(async () => {
     try {
       const res = await request.post(`/touzikuaibao/approve/${row.id}`, null, {
-        params: { operatorDanweiId }
+        params: { operatorDanweiId, operatorId: user.id }
       });
       if (res.code === '200') {
         ElMessage.success('审批成功');
@@ -864,7 +866,7 @@ const handleReturn = async (row) => {
   ).then(async () => {
     try {
       const res = await request.post(`/touzikuaibao/return/${row.id}`, null, {
-        params: { operatorDanweiId }
+        params: { operatorDanweiId, operatorId: user.id }
       });
       if (res.code === '200') {
         ElMessage.success('退回成功');

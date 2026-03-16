@@ -75,6 +75,22 @@
                     </el-menu-item>
                   </el-sub-menu>
                   
+                  <!-- 主要产品货流去向 -->
+                  <el-sub-menu index="cphlqx">
+                    <template #title>
+                      <el-icon><Document /></el-icon>
+                      <span>主要产品货流去向</span>
+                    </template>
+                    <el-menu-item index="/manager/cphlqx/manage">
+                      <el-icon><Edit /></el-icon>
+                      <span>管理</span>
+                    </el-menu-item>
+                    <el-menu-item index="/manager/cphlqx/approve">
+                      <el-icon><Stamp /></el-icon>
+                      <span>审批</span>
+                    </el-menu-item>
+                  </el-sub-menu>
+                  
                   <!-- 统计报表 -->
                   <el-sub-menu index="tjbb">
                     <template #title>
@@ -84,6 +100,10 @@
                     <el-menu-item index="/manager/touzikuaibao">
                       <el-icon><PieChart /></el-icon>
                       <span>产值、主要产品产量及固定资产投资快报</span>
+                    </el-menu-item>
+                    <el-menu-item index="/manager/cphlqx/report">
+                      <el-icon><PieChart /></el-icon>
+                      <span>主要产品货流去向报表</span>
                     </el-menu-item>
                   </el-sub-menu>
                 </el-sub-menu>

@@ -197,8 +197,8 @@ public class TouZiKuaiBaoController {
      * 上报记录
      */
     @PostMapping("/submit/{id}")
-    public Result submitReport(@PathVariable Long id) {
-        boolean success = touZiKuaiBaoService.submitReport(id);
+    public Result submitReport(@PathVariable Long id, @RequestParam(required = false) Integer operatorId) {
+        boolean success = touZiKuaiBaoService.submitReport(id, operatorId);
         if (success) {
             return Result.success("上报成功");
         } else {
@@ -227,8 +227,9 @@ public class TouZiKuaiBaoController {
     @PostMapping("/approve/{id}")
     public Result approveReport(@PathVariable Long id,
             @RequestParam Integer operatorDanweiId,
-            @RequestParam(defaultValue = "false") boolean forceApprove) {
-        String result = touZiKuaiBaoService.approveReport(id, operatorDanweiId, forceApprove);
+            @RequestParam(defaultValue = "false") boolean forceApprove,
+            @RequestParam(required = false) Integer operatorId) {
+        String result = touZiKuaiBaoService.approveReport(id, operatorDanweiId, forceApprove, operatorId);
         if ("审批成功".equals(result)) {
             return Result.success(result);
         } else if (result.startsWith("SKIP_WARNING:")) {
@@ -247,8 +248,9 @@ public class TouZiKuaiBaoController {
      * @param operatorDanweiId 操作者单位ID
      */
     @PostMapping("/return/{id}")
-    public Result returnForModification(@PathVariable Long id, @RequestParam Integer operatorDanweiId) {
-        String result = touZiKuaiBaoService.returnForModification(id, operatorDanweiId);
+    public Result returnForModification(@PathVariable Long id, @RequestParam Integer operatorDanweiId,
+            @RequestParam(required = false) Integer operatorId) {
+        String result = touZiKuaiBaoService.returnForModification(id, operatorDanweiId, operatorId);
         if ("退回成功".equals(result)) {
             return Result.success(result);
         } else {

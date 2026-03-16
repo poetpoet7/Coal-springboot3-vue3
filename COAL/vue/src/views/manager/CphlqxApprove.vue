@@ -64,7 +64,7 @@
 
     <!-- 数据表格 -->
     <div class="card">
-      <div class="report-title">产值、主要产品产量及固定资产投资快报 - 审批</div>
+      <div class="report-title">主要产品货流去向 - 审批</div>
       
       <el-table
         v-loading="loading"
@@ -89,6 +89,11 @@
             <el-tag size="small" effect="plain">{{ scope.row.yuefen }}月</el-tag>
           </template>
         </el-table-column>
+        <el-table-column prop="chanpinmingcheng" label="产品名称" width="120" fixed align="center">
+          <template v-slot="scope">
+            <el-tag type="info">{{ scope.row.chanpinmingcheng }}</el-tag>
+          </template>
+        </el-table-column>
         <el-table-column prop="zhuangtai" label="状态" width="120" fixed align="center">
           <template v-slot="scope">
             <el-tag :type="getStatusTagType(scope.row.zhuangtai)">
@@ -97,152 +102,47 @@
           </template>
         </el-table-column>
         
-        <!-- 经营总值(万元) -->
-        <el-table-column label="经营总值(万元)" align="center">
-          <el-table-column prop="jingyingzongzhiheji" label="计" width="100" align="right">
-            <template v-slot="scope">{{ formatNumber(scope.row.jingyingzongzhiheji) }}</template>
+        <!-- 销往地区 -->
+        <el-table-column label="销往地区(吨)" align="center">
+          <el-table-column label="合计" width="120" align="right">
+            <template v-slot="scope">{{ formatNumber(sumRegion(scope.row)) }}</template>
           </el-table-column>
-          <el-table-column prop="gongyechanzhi" label="工业产值(现价)" width="120" align="right">
-            <template v-slot="scope">{{ formatNumber(scope.row.gongyechanzhi) }}</template>
+          <el-table-column prop="shandongshengnei" label="山东省内" width="120" align="right">
+            <template v-slot="scope">{{ formatNumber(scope.row.shandongshengnei) }}</template>
           </el-table-column>
-          <el-table-column prop="qitachanzhi" label="其他产值、营业额" width="130" align="right">
-            <template v-slot="scope">{{ formatNumber(scope.row.qitachanzhi) }}</template>
+          <el-table-column prop="shandongshengwai" label="山东省外" width="120" align="right">
+            <template v-slot="scope">{{ formatNumber(scope.row.shandongshengwai) }}</template>
           </el-table-column>
-        </el-table-column>
-        
-        <!-- 新产品价值 -->
-        <el-table-column prop="xinchanpinjiazhi" label="新产品价值(万元)" width="120" align="right">
-          <template v-slot="scope">{{ formatNumber(scope.row.xinchanpinjiazhi) }}</template>
-        </el-table-column>
-        
-        <!-- 工业销售产值 -->
-        <el-table-column label="工业销售产值(万元)" align="center">
-          <el-table-column prop="gyxsczheji" label="计" width="100" align="right">
-            <template v-slot="scope">{{ formatNumber(scope.row.gyxsczheji) }}</template>
+          <el-table-column prop="guowai" label="其中：国外" width="120" align="right">
+            <template v-slot="scope">{{ formatNumber(scope.row.guowai) }}</template>
           </el-table-column>
-          <el-table-column prop="chukoujiaohuozhi" label="其中：出口交货值" width="130" align="right">
-            <template v-slot="scope">{{ formatNumber(scope.row.chukoujiaohuozhi) }}</template>
+          <el-table-column prop="gongsiziyong" label="公司自用" width="120" align="right">
+            <template v-slot="scope">{{ formatNumber(scope.row.gongsiziyong) }}</template>
           </el-table-column>
         </el-table-column>
         
-        <!-- 主要产品产量 -->
-        <el-table-column label="主要产品产量" align="center">
-          <el-table-column prop="yuanmei" label="原煤(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.yuanmei) }}</template>
+        <!-- 运输方式 -->
+        <el-table-column label="运输方式(吨)" align="center">
+          <el-table-column label="合计" width="120" align="right">
+            <template v-slot="scope">{{ formatNumber(sumTransport(scope.row)) }}</template>
           </el-table-column>
-          <el-table-column prop="jingmei" label="精煤(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.jingmei) }}</template>
+          <el-table-column prop="tieluyunshu" label="铁路运输" width="120" align="right">
+            <template v-slot="scope">{{ formatNumber(scope.row.tieluyunshu) }}</template>
           </el-table-column>
-          <el-table-column prop="niaosu" label="尿素(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.niaosu) }}</template>
+          <el-table-column prop="qicheyunshu" label="汽车运输" width="120" align="right">
+            <template v-slot="scope">{{ formatNumber(scope.row.qicheyunshu) }}</template>
           </el-table-column>
-          <el-table-column prop="jiachun" label="甲醇(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.jiachun) }}</template>
+          <el-table-column prop="neiheyunshu" label="内河运输" width="120" align="right">
+            <template v-slot="scope">{{ formatNumber(scope.row.neiheyunshu) }}</template>
           </el-table-column>
-          <el-table-column prop="cusuan" label="醋酸(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.cusuan) }}</template>
+          <el-table-column prop="dixiao" label="地销" width="120" align="right">
+            <template v-slot="scope">{{ formatNumber(scope.row.dixiao) }}</template>
           </el-table-column>
-          <el-table-column prop="jiaotan" label="焦炭(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.jiaotan) }}</template>
+          <el-table-column prop="ziyingtielu" label="自营铁路" width="120" align="right">
+            <template v-slot="scope">{{ formatNumber(scope.row.ziyingtielu) }}</template>
           </el-table-column>
-          <el-table-column prop="cusuanyizhi" label="醋酸乙酯(吨)" width="120" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.cusuanyizhi) }}</template>
-          </el-table-column>
-          <el-table-column prop="cusuandingzhi" label="醋酸丁酯(吨)" width="120" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.cusuandingzhi) }}</template>
-          </el-table-column>
-          <el-table-column prop="cugan" label="醋酐(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.cugan) }}</template>
-          </el-table-column>
-          <el-table-column prop="tansuanerjiazhi" label="碳酸二甲酯(吨)" width="120" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.tansuanerjiazhi) }}</template>
-          </el-table-column>
-          <el-table-column prop="hechengan" label="合成氨(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.hechengan) }}</template>
-          </el-table-column>
-          <el-table-column prop="dingchun" label="丁醇(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.dingchun) }}</template>
-          </el-table-column>
-          <el-table-column prop="jujiaquan" label="聚甲醛(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.jujiaquan) }}</template>
-          </el-table-column>
-          <el-table-column prop="gaizhiliqing" label="改质沥青(吨)" width="110" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.gaizhiliqing) }}</template>
-          </el-table-column>
-          <el-table-column prop="enyou" label="蒽油(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.enyou) }}</template>
-          </el-table-column>
-          <el-table-column prop="fuhefei" label="复合肥(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.fuhefei) }}</template>
-          </el-table-column>
-          <el-table-column prop="lvding" label="铝锭(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.lvding) }}</template>
-          </el-table-column>
-          <el-table-column prop="tansuzhipin" label="碳素制品(吨)" width="110" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.tansuzhipin) }}</template>
-          </el-table-column>
-          <el-table-column prop="lvzhucai" label="铝铸材(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.lvzhucai) }}</template>
-          </el-table-column>
-          <el-table-column prop="lvjiyacai" label="铝挤压材(吨)" width="110" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.lvjiyacai) }}</template>
-          </el-table-column>
-          <el-table-column prop="fadianliang" label="发电量(万千瓦时)" width="130" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.fadianliang) }}</template>
-          </el-table-column>
-          <el-table-column prop="pidaiyunshuji" label="皮带运输机(台)" width="120" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.pidaiyunshuji) }}</template>
-          </el-table-column>
-          <el-table-column prop="shusongdai" label="输送带(M2)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.shusongdai) }}</template>
-          </el-table-column>
-          <el-table-column prop="dianlan" label="电缆(米)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.dianlan) }}</template>
-          </el-table-column>
-          <el-table-column prop="yeyazhijia" label="液压支架(架)" width="110" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.yeyazhijia) }}</template>
-          </el-table-column>
-          <el-table-column prop="guabanyunshuji" label="刮板运输机(台)" width="120" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.guabanyunshuji) }}</template>
-          </el-table-column>
-          <el-table-column prop="gaolingtu" label="高岭土(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.gaolingtu) }}</template>
-          </el-table-column>
-          <el-table-column prop="qingchaiyou" label="轻柴油(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.qingchaiyou) }}</template>
-          </el-table-column>
-          <el-table-column prop="zhongchaiyou" label="重柴油(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.zhongchaiyou) }}</template>
-          </el-table-column>
-          <el-table-column prop="shinaoyou" label="石脑油(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.shinaoyou) }}</template>
-          </el-table-column>
-          <el-table-column prop="yehuashiyouqi" label="液化石油气" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.yehuashiyouqi) }}</template>
-          </el-table-column>
-          <el-table-column prop="liuhuang" label="硫磺(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.liuhuang) }}</template>
-          </el-table-column>
-          <el-table-column prop="liuhuangan" label="硫酸铵(吨)" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.liuhuangan) }}</template>
-          </el-table-column>
-          <el-table-column prop="qitachanpin" label="其他产品" width="100" align="right">
-            <template v-slot="scope">{{ formatLong(scope.row.qitachanpin) }}</template>
-          </el-table-column>
-        </el-table-column>
-        
-        <!-- 企业用电量(万千瓦时) -->
-        <el-table-column prop="qiyeyongdianliang" label="企业用电量(万千瓦时)" width="160" align="right">
-          <template v-slot="scope">{{ formatLong(scope.row.qiyeyongdianliang) }}</template>
-        </el-table-column>
-        
-        <!-- 固定资产投资(万元) -->
-        <el-table-column label="固定资产投资(万元)" align="center">
-          <el-table-column prop="gdzctzheji" label="合计" width="100" align="right">
-            <template v-slot="scope">{{ formatNumber(scope.row.gdzctzheji) }}</template>
-          </el-table-column>
-          <el-table-column prop="jishugaizao" label="技术改造" width="100" align="right">
-            <template v-slot="scope">{{ formatNumber(scope.row.jishugaizao) }}</template>
+          <el-table-column prop="kuangziyong" label="矿自用" width="120" align="right">
+            <template v-slot="scope">{{ formatNumber(scope.row.kuangziyong) }}</template>
           </el-table-column>
         </el-table-column>
       </el-table>
@@ -299,12 +199,12 @@ const selectedRows = ref([]);
 // 加载单位列表（只加载有下级单位的）
 const loadUnitList = async () => {
   try {
-    const res = await request.get('/touzikuaibao/units');
+    const res = await request.get('/chanpinhuoliu/units');
     if (res.code === '200') {
       const units = res.data || [];
       // 标记每个单位是否为基层单位
       for (const unit of units) {
-        const infoRes = await request.get('/touzikuaibao/unitInfo', {
+        const infoRes = await request.get('/chanpinhuoliu/unitInfo', {
           params: { danweiBianma: unit.bianma }
         });
         if (infoRes.code === '200' && infoRes.data.exists) {
@@ -326,7 +226,7 @@ const loadCurrentUnitInfo = async () => {
   if (!user.danweibianma) return;
   
   try {
-    const res = await request.get('/touzikuaibao/unitInfo', {
+    const res = await request.get('/chanpinhuoliu/unitInfo', {
       params: { danweiBianma: user.danweibianma }
     });
     
@@ -345,7 +245,6 @@ const loadCurrentUnitInfo = async () => {
   }
 };
 
-// 查询数据（查询所有下级单位的记录，含间接下级）
 // 查询
 const handleQuery = async () => {
   if (!queryForm.danweiId) {
@@ -355,13 +254,11 @@ const handleQuery = async () => {
   
   loading.value = true;
   try {
-    // 获取所有单位列表
-    const allUnits = await request.get('/touzikuaibao/units');
+    const allUnits = await request.get('/chanpinhuoliu/units');
     if (allUnits.code !== '200') return;
     
     const units = allUnits.data || [];
     
-    // 递归获取所有下级单位（包括间接下级）
     const getAllDescendants = (parentId) => {
       const directChildren = units.filter(u => u.shangjidanweiid === parentId);
       let allDescendants = [...directChildren];
@@ -379,10 +276,9 @@ const handleQuery = async () => {
       return;
     }
     
-    // 查询所有下级单位的数据
     const allData = [];
     for (const child of childUnits) {
-      const res = await request.get('/touzikuaibao/list', {
+      const res = await request.get('/chanpinhuoliu/list', {
         params: {
           danweiId: child.id,
           nianfen: parseInt(queryForm.nianfen),
@@ -401,19 +297,15 @@ const handleQuery = async () => {
     // 过滤状态
     if (queryForm.status) {
       if (queryForm.status === '待审批') {
-        // 匹配所有待审批状态
         tableData.value = allData.filter(item => item.zhuangtai && item.zhuangtai.startsWith('待审批'));
       } else if (queryForm.status === '审批通过') {
-        // 匹配审批通过
         tableData.value = allData.filter(item => item.zhuangtai === '审批通过');
       } else if (queryForm.status === '返回修改') {
-        // 匹配返回修改状态
         tableData.value = allData.filter(item => item.zhuangtai === '返回修改');
       } else {
         tableData.value = allData.filter(item => item.zhuangtai === queryForm.status);
       }
     } else {
-      // 全部：显示所有记录
       tableData.value = allData;
     }
     
@@ -468,19 +360,16 @@ const isApproveStatus = (status) => {
 const handleApprove = async (row, forceApprove = false) => {
   const operatorDanweiId = queryForm.danweiId;
   
-  // 执行审批请求
   const doApprove = async (force) => {
     try {
-      const res = await request.post(`/touzikuaibao/approve/${row.id}`, null, {
+      const res = await request.post(`/chanpinhuoliu/approve/${row.id}`, null, {
         params: { operatorDanweiId, forceApprove: force, operatorId: user.id }
       });
       if (res.code === '200') {
         ElMessage.success('审批成功');
         handleQuery();
       } else if (res.msg && res.msg.startsWith('SKIP_WARNING:')) {
-        // 跳级审批警告，弹出确认框
         const pendingUnits = res.msg.substring('SKIP_WARNING:'.length);
-        // 使用 HTML 格式化，确保每个单位单独一行
         const unitListHtml = pendingUnits.split('、').map(u => `&bull; ${u}`).join('<br>');
         ElMessageBox.confirm(
           `以下单位还未进行审批：<br><br>${unitListHtml}<br><br>是否直接审批？`, 
@@ -492,7 +381,6 @@ const handleApprove = async (row, forceApprove = false) => {
             dangerouslyUseHTMLString: true
           }
         ).then(() => {
-          // 用户确认跳级审批
           doApprove(true);
         }).catch(() => {});
       } else {
@@ -504,10 +392,8 @@ const handleApprove = async (row, forceApprove = false) => {
   };
   
   if (forceApprove) {
-    // 强制审批，直接执行
     doApprove(true);
   } else {
-    // 先确认
     ElMessageBox.confirm(
       `确定要审批通过该记录吗？`, 
       '审批确认', 
@@ -536,7 +422,7 @@ const handleReturn = async (row) => {
     }
   ).then(async () => {
     try {
-      const res = await request.post(`/touzikuaibao/return/${row.id}`, null, {
+      const res = await request.post(`/chanpinhuoliu/return/${row.id}`, null, {
         params: { operatorDanweiId, operatorId: user.id }
       });
       if (res.code === '200') {
@@ -571,7 +457,7 @@ const handleBatchApprove = () => {
     let successCount = 0;
     const operatorDanweiId = queryForm.danweiId;
     for (const row of pendingRows) {
-      const res = await request.post(`/touzikuaibao/approve/${row.id}`, null, {
+      const res = await request.post(`/chanpinhuoliu/approve/${row.id}`, null, {
         params: { operatorDanweiId, operatorId: user.id }
       });
       if (res.code === '200') {
@@ -603,7 +489,7 @@ const handleBatchReturn = () => {
     let successCount = 0;
     const operatorDanweiId = queryForm.danweiId;
     for (const row of returnableRows) {
-      const res = await request.post(`/touzikuaibao/return/${row.id}`, null, {
+      const res = await request.post(`/chanpinhuoliu/return/${row.id}`, null, {
         params: { operatorDanweiId, operatorId: user.id }
       });
       if (res.code === '200') {
@@ -617,52 +503,53 @@ const handleBatchReturn = () => {
 
 // 格式化数字
 const formatNumber = (value) => {
-  if (value === null || value === undefined) return '';
+  if (value === null || value === undefined) return '0.00';
   return Number(value).toLocaleString('zh-CN', {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2
   });
 };
 
-// 格式化长整型
-const formatLong = (value) => {
-  if (value === null || value === undefined || value === 0) return '';
-  return Number(value).toLocaleString('zh-CN');
+// 计算合计
+const sumRegion = (row) => {
+  return (row.shandongshengnei || 0) + (row.shandongshengwai || 0) + (row.guowai || 0) + (row.gongsiziyong || 0);
 };
 
-onMounted(async () => {
+const sumTransport = (row) => {
+  return (row.tieluyunshu || 0) + (row.qicheyunshu || 0) + (row.neiheyunshu || 0) + (row.dixiao || 0) + (row.ziyingtielu || 0) + (row.kuangziyong || 0);
+};
+
+onMounted(() => {
   if (isAdmin.value) {
-    await loadUnitList();
+    loadUnitList();
   } else {
-    await loadCurrentUnitInfo();
+    loadCurrentUnitInfo();
   }
 });
 </script>
 
 <style scoped>
 .czkb-approve {
-  padding: 0;
+  padding: 20px;
 }
-
 .card {
-  background: #fff;
-  padding: 15px;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
-
 .report-title {
   text-align: center;
-  font-size: 18px;
+  font-size: 24px;
   font-weight: bold;
-  margin-bottom: 15px;
+  color: #1e293b;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e2e8f0;
 }
-
-:deep(.el-table) {
-  font-size: 12px;
-}
-
-:deep(.el-table th) {
-  font-weight: bold;
+.premium-table {
+  --el-table-border-color: #e2e8f0;
+  --el-table-header-bg-color: #f8fafc;
+  --el-table-row-hover-bg-color: #f1f5f9;
 }
 </style>

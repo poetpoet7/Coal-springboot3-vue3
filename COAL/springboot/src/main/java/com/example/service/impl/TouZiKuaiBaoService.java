@@ -2,8 +2,10 @@ package com.example.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.entity.Danwei;
+import com.example.entity.ShenPiRecord;
 import com.example.entity.TongjiCzcptouzikuaibao;
 import com.example.mapper.DanweiMapper;
+import com.example.mapper.ShenPiRecordMapper;
 import com.example.mapper.TongjiCzcptouzikuaibaoMapper;
 import com.example.utils.CumulativeUtils;
 import jakarta.annotation.Resource;
@@ -26,6 +28,9 @@ public class TouZiKuaiBaoService {
 
     @Resource
     private TongjiCzcptouzikuaibaoMapper tongjiMapper;
+
+    @Resource
+    private ShenPiRecordMapper shenPiRecordMapper;
 
     @Resource
     private PermissionService permissionService;
@@ -685,7 +690,7 @@ public class TouZiKuaiBaoService {
      * 上报记录
      * 根据单位层级计算审批级别，设置状态为"待审批N"
      */
-    public boolean submitReport(Long id) {
+    public boolean submitReport(Long id, Integer operatorId) {
         TongjiCzcptouzikuaibao report = tongjiMapper.selectById(id);
         if (report == null) {
             return false;
@@ -697,8 +702,12 @@ public class TouZiKuaiBaoService {
         }
         // 计算审批层级
         int approvalLevel = calculateApprovalLevel(report.getDanweiid());
-        report.setZhuangtai("待审批" + approvalLevel);
+        String newStatus = "待审批" + approvalLevel;
+        report.setZhuangtai(newStatus);
         tongjiMapper.updateById(report);
+
+        // 记录审批流水
+        recordApprovalHistory(id.intValue(), operatorId, "上报数据", null, newStatus);
         return true;
     }
 
@@ -802,7 +811,7 @@ public class TouZiKuaiBaoService {
      * @param forceApprove     是否强制审批（跳过下级未审批警告）
      * @return 操作结果消息
      */
-    public String approveReport(Long id, Integer operatorDanweiId, boolean forceApprove) {
+    public String approveReport(Long id, Integer operatorDanweiId, boolean forceApprove, Integer operatorId) {
         TongjiCzcptouzikuaibao report = tongjiMapper.selectById(id);
         if (report == null) {
             return "记录不存在";
@@ -841,14 +850,22 @@ public class TouZiKuaiBaoService {
         // 解析当前审批级别
         try {
             int currentLevel = Integer.parseInt(currentStatus.replace("待审批", ""));
+            String newStatus;
             if (currentLevel <= 1) {
                 // 最后一级审批，状态变为审批通过
-                report.setZhuangtai("审批通过");
+                newStatus = "审批通过";
             } else {
                 // 还有上级需要审批，降低审批级别
-                report.setZhuangtai("待审批" + (currentLevel - 1));
+                newStatus = "待审批" + (currentLevel - 1);
             }
+            report.setZhuangtai(newStatus);
             tongjiMapper.updateById(report);
+
+            // 记录审批流水
+            Danwei operatorDanwei = danweiMapper.selectById(operatorDanweiId);
+            String danweiName = operatorDanwei != null ? operatorDanwei.getMingcheng() : "";
+            recordApprovalHistory(id.intValue(), operatorId, "审批通过", null, currentStatus + "(" + danweiName + ")");
+
             return "审批成功";
         } catch (NumberFormatException e) {
             return "状态格式错误";
@@ -889,7 +906,7 @@ public class TouZiKuaiBaoService {
      * @param operatorDanweiId 操作者单位ID
      * @return 操作结果消息
      */
-    public String returnForModification(Long id, Integer operatorDanweiId) {
+    public String returnForModification(Long id, Integer operatorDanweiId, Integer operatorId) {
         TongjiCzcptouzikuaibao report = tongjiMapper.selectById(id);
         if (report == null) {
             return "记录不存在";
@@ -909,6 +926,12 @@ public class TouZiKuaiBaoService {
         // 状态改为待上报
         report.setZhuangtai("待上报");
         tongjiMapper.updateById(report);
+
+        // 记录审批流水
+        Danwei operatorDanwei = danweiMapper.selectById(operatorDanweiId);
+        String danweiName = operatorDanwei != null ? operatorDanwei.getMingcheng() : "";
+        recordApprovalHistory(id.intValue(), operatorId, "返回修改", null, currentStatus + "(" + danweiName + ")");
+
         return "退回成功";
     }
 
@@ -946,5 +969,27 @@ public class TouZiKuaiBaoService {
         result.put("canApprove", status != null && status.startsWith("待审批"));
         result.put("canReturn", status != null && !status.equals("待上报") && !status.equals("返回修改"));
         return result;
+    }
+
+    // ==================== 审批流水记录 ====================
+
+    /**
+     * 记录审批流水到 Tb_CZCPTouZiKuaiBao_ShenPi 表
+     *
+     * @param shenqingId  关联的快报记录ID
+     * @param operatorId  操作人用户ID
+     * @param jieguo      审批结果（上报数据/审批通过/返回修改）
+     * @param yijian      审批意见（可为null）
+     * @param beizhu      备注信息（如：待审批3(兖州煤业)）
+     */
+    private void recordApprovalHistory(Integer shenqingId, Integer operatorId, String jieguo, String yijian, String beizhu) {
+        ShenPiRecord record = new ShenPiRecord();
+        record.setShenqingid(shenqingId);
+        record.setShenpirenid(operatorId != null ? operatorId : 0);
+        record.setShenpishijian(new Date());
+        record.setShenpijieguo(jieguo);
+        record.setShenpiyijian(yijian);
+        record.setBeizhu(beizhu);
+        shenPiRecordMapper.insert(record);
     }
 }
