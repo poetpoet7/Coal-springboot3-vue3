@@ -268,10 +268,9 @@ const formatNumber = (value) => {
 // Summations
 const sumRegionBenyue = () => {
   if (!reportData.value) return 0;
-  // 销往地区合计 = 山东省内 + 山东省外 + 国外 + 公司自用
+  // 销往地区合计 = 山东省内 + 山东省外 + 公司自用 (国外作为其中项不计入)
   return (reportData.value.shandongshengnei || 0) + 
          (reportData.value.shandongshengwai || 0) + 
-         (reportData.value.guowai || 0) + 
          (reportData.value.gongsiziyong || 0);
 };
 
@@ -279,7 +278,6 @@ const sumRegionLeiji = () => {
   if (!reportData.value) return 0;
   return (reportData.value.shandongshengneileiji || 0) + 
          (reportData.value.shandongshengwaileiji || 0) + 
-         (reportData.value.guowaileiji || 0) + 
          (reportData.value.gongsiziyongleiji || 0);
 };
 

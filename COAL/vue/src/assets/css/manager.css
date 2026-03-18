@@ -1,6 +1,9 @@
 .manager-container {
     background-color: #f5f7fa;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
@@ -14,6 +17,7 @@
     box-shadow: 0 2px 8px rgba(0, 102, 188, 0.3);
     position: relative;
     z-index: 1000;
+    flex-shrink: 0;
 }
 
 .manager-header-left {
@@ -52,7 +56,7 @@
 /* ===== SIDEBAR - 优雅蓝主题 ===== */
 .manager-main-left {
     background: linear-gradient(180deg, #004e92 0%, #00356b 100%);
-    min-height: calc(100vh - 50px);
+    height: calc(100vh - 50px);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -69,9 +73,11 @@
 .manager-main-right {
     flex: 1;
     width: 0;
+    height: calc(100vh - 50px);
     padding: 16px;
     background-color: #f5f7fa;
     overflow-x: hidden;
+    overflow-y: auto;
 }
 
 /* Resizer */
@@ -388,6 +394,13 @@
     align-items: center;
     padding: 0 10px;
     margin-bottom: 10px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.tags-view-container::-webkit-scrollbar {
+    display: none; /* 隐藏横向滚动条 */
 }
 
 .tags-view-item {
@@ -405,6 +418,14 @@
     margin-top: 4px;
     border-radius: 3px;
     transition: all 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
+    flex-shrink: 0;
+    max-width: 140px;
+}
+
+.tags-view-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .tags-view-item:first-of-type {
@@ -430,6 +451,7 @@
     border-radius: 50%;
     position: relative;
     margin-right: 5px;
+    flex-shrink: 0;
 }
 
 .tags-view-item .el-icon-close {
@@ -442,6 +464,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .tags-view-item .el-icon-close:hover {

@@ -201,21 +201,46 @@
           <el-col :span="12">
             <el-divider content-position="left">销往地区(吨)</el-divider>
             <el-form-item label="销往地区(合计)">
-              <el-input :value="formatNumber(totalRegion)" disabled style="width: 100%">
-                <template #suffix>自动计算</template>
-              </el-input>
+              <div style="display: flex; gap: 10px; width: 100%">
+                <el-input :value="formatNumber(totalRegion)" disabled style="flex: 1">
+                  <template #suffix>自动计算</template>
+                </el-input>
+                <el-input :value="formatNumber(totalRegionLeiji)" disabled style="flex: 1">
+                  <template #prefix>累计合计</template>
+                </el-input>
+              </div>
             </el-form-item>
             <el-form-item label="山东省内">
-              <el-input-number v-model="formData.shandongshengnei" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+              <div style="display: flex; gap: 10px; width: 100%">
+                <el-input-number v-model="formData.shandongshengnei" :precision="2" :controls="false" placeholder="本月" style="flex: 1"></el-input-number>
+                <el-input :value="formatNumber(realtimeCumulative.shandongshengneileiji)" disabled placeholder="累计" style="flex: 1">
+                  <template #prefix>累计</template>
+                </el-input>
+              </div>
             </el-form-item>
             <el-form-item label="山东省外">
-              <el-input-number v-model="formData.shandongshengwai" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+              <div style="display: flex; gap: 10px; width: 100%">
+                <el-input-number v-model="formData.shandongshengwai" :precision="2" :controls="false" placeholder="本月" style="flex: 1"></el-input-number>
+                <el-input :value="formatNumber(realtimeCumulative.shandongshengwaileiji)" disabled placeholder="累计" style="flex: 1">
+                  <template #prefix>累计</template>
+                </el-input>
+              </div>
             </el-form-item>
             <el-form-item label="其中：国外">
-              <el-input-number v-model="formData.guowai" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+              <div style="display: flex; gap: 10px; width: 100%">
+                <el-input-number v-model="formData.guowai" :precision="2" :controls="false" placeholder="本月" style="flex: 1"></el-input-number>
+                <el-input :value="formatNumber(realtimeCumulative.guowaileiji)" disabled placeholder="累计" style="flex: 1">
+                  <template #prefix>累计</template>
+                </el-input>
+              </div>
             </el-form-item>
             <el-form-item label="公司自用">
-              <el-input-number v-model="formData.gongsiziyong" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+              <div style="display: flex; gap: 10px; width: 100%">
+                <el-input-number v-model="formData.gongsiziyong" :precision="2" :controls="false" placeholder="本月" style="flex: 1"></el-input-number>
+                <el-input :value="formatNumber(realtimeCumulative.gongsiziyongleiji)" disabled placeholder="累计" style="flex: 1">
+                  <template #prefix>累计</template>
+                </el-input>
+              </div>
             </el-form-item>
           </el-col>
           
@@ -223,27 +248,62 @@
           <el-col :span="12">
             <el-divider content-position="left">运输方式(吨)</el-divider>
             <el-form-item label="运输方式(合计)">
-              <el-input :value="formatNumber(totalTransport)" disabled style="width: 100%">
-                <template #suffix>自动计算</template>
-              </el-input>
+              <div style="display: flex; gap: 10px; width: 100%">
+                <el-input :value="formatNumber(totalTransport)" disabled style="flex: 1">
+                  <template #suffix>自动计算</template>
+                </el-input>
+                <el-input :value="formatNumber(totalTransportLeiji)" disabled style="flex: 1">
+                  <template #prefix>累计合计</template>
+                </el-input>
+              </div>
             </el-form-item>
             <el-form-item label="铁路运输">
-              <el-input-number v-model="formData.tieluyunshu" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+              <div style="display: flex; gap: 10px; width: 100%">
+                <el-input-number v-model="formData.tieluyunshu" :precision="2" :controls="false" placeholder="本月" style="flex: 1"></el-input-number>
+                <el-input :value="formatNumber(realtimeCumulative.tieluyunshuleiji)" disabled placeholder="累计" style="flex: 1">
+                  <template #prefix>累计</template>
+                </el-input>
+              </div>
             </el-form-item>
             <el-form-item label="汽车运输">
-              <el-input-number v-model="formData.qicheyunshu" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+              <div style="display: flex; gap: 10px; width: 100%">
+                <el-input-number v-model="formData.qicheyunshu" :precision="2" :controls="false" placeholder="本月" style="flex: 1"></el-input-number>
+                <el-input :value="formatNumber(realtimeCumulative.qicheyunshuleiji)" disabled placeholder="累计" style="flex: 1">
+                  <template #prefix>累计</template>
+                </el-input>
+              </div>
             </el-form-item>
             <el-form-item label="内河运输">
-              <el-input-number v-model="formData.neiheyunshu" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+              <div style="display: flex; gap: 10px; width: 100%">
+                <el-input-number v-model="formData.neiheyunshu" :precision="2" :controls="false" placeholder="本月" style="flex: 1"></el-input-number>
+                <el-input :value="formatNumber(realtimeCumulative.neiheyunshuleiji)" disabled placeholder="累计" style="flex: 1">
+                  <template #prefix>累计</template>
+                </el-input>
+              </div>
             </el-form-item>
             <el-form-item label="地销">
-              <el-input-number v-model="formData.dixiao" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+              <div style="display: flex; gap: 10px; width: 100%">
+                <el-input-number v-model="formData.dixiao" :precision="2" :controls="false" placeholder="本月" style="flex: 1"></el-input-number>
+                <el-input :value="formatNumber(realtimeCumulative.dixiaoleiji)" disabled placeholder="累计" style="flex: 1">
+                  <template #prefix>累计</template>
+                </el-input>
+              </div>
             </el-form-item>
             <el-form-item label="自营铁路">
-              <el-input-number v-model="formData.ziyingtielu" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+              <div style="display: flex; gap: 10px; width: 100%">
+                <el-input-number v-model="formData.ziyingtielu" :precision="2" :controls="false" placeholder="本月" style="flex: 1"></el-input-number>
+                <el-input :value="formatNumber(realtimeCumulative.ziyingtieluleiji)" disabled placeholder="累计" style="flex: 1">
+                  <template #prefix>累计</template>
+                </el-input>
+              </div>
             </el-form-item>
             <el-form-item label="矿自用">
-              <el-input-number v-model="formData.kuangziyong" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+              <div style="display: flex; gap: 10px; width: 100%">
+                <el-input-number v-model="formData.kuangziyong" :precision="2" :controls="false" placeholder="本月" style="flex: 1"></el-input-number>
+                <el-input :value="formatNumber(realtimeCumulative.kuangziyongleiji)" disabled placeholder="累计" style="flex: 1">
+                  <template #prefix>累计</template>
+                </el-input>
+              </div>
             </el-form-item>
           </el-col>
         </el-row>
@@ -260,7 +320,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, computed } from "vue";
+import { reactive, ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import request from "@/utils/request.js";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -295,11 +355,17 @@ const selectedUnitInfo = computed(() => {
 
 // 合计自动计算
 const totalRegion = computed(() => {
-  return (formData.shandongshengnei || 0) + (formData.shandongshengwai || 0) + (formData.guowai || 0) + (formData.gongsiziyong || 0);
+  return (formData.shandongshengnei || 0) + (formData.shandongshengwai || 0) + (formData.gongsiziyong || 0);
+});
+const totalRegionLeiji = computed(() => {
+  return (realtimeCumulative.value.shandongshengneileiji || 0) + (realtimeCumulative.value.shandongshengwaileiji || 0) + (realtimeCumulative.value.gongsiziyongleiji || 0);
 });
 
 const totalTransport = computed(() => {
   return (formData.tieluyunshu || 0) + (formData.qicheyunshu || 0) + (formData.neiheyunshu || 0) + (formData.dixiao || 0) + (formData.ziyingtielu || 0) + (formData.kuangziyong || 0);
+});
+const totalTransportLeiji = computed(() => {
+  return (realtimeCumulative.value.tieluyunshuleiji || 0) + (realtimeCumulative.value.qicheyunshuleiji || 0) + (realtimeCumulative.value.neiheyunshuleiji || 0) + (realtimeCumulative.value.dixiaoleiji || 0) + (realtimeCumulative.value.ziyingtieluleiji || 0) + (realtimeCumulative.value.kuangziyongleiji || 0);
 });
 
 // 查询表单
@@ -338,6 +404,96 @@ const formData = reactive({
   ziyingtielu: null,
   kuangziyong: null
 });
+
+// 记录上一个月的累计数据
+const lastMonthData = reactive({
+  shandongshengneileiji: 0,
+  shandongshengwaileiji: 0,
+  guowaileiji: 0,
+  gongsiziyongleiji: 0,
+  tieluyunshuleiji: 0,
+  qicheyunshuleiji: 0,
+  neiheyunshuleiji: 0,
+  dixiaoleiji: 0,
+  ziyingtieluleiji: 0,
+  kuangziyongleiji: 0
+});
+
+// 实时计算当前累计 = 上月累计 + 本月输入
+const realtimeCumulative = computed(() => {
+  return {
+    shandongshengneileiji: (lastMonthData.shandongshengneileiji || 0) + (formData.shandongshengnei || 0),
+    shandongshengwaileiji: (lastMonthData.shandongshengwaileiji || 0) + (formData.shandongshengwai || 0),
+    guowaileiji: (lastMonthData.guowaileiji || 0) + (formData.guowai || 0),
+    gongsiziyongleiji: (lastMonthData.gongsiziyongleiji || 0) + (formData.gongsiziyong || 0),
+    tieluyunshuleiji: (lastMonthData.tieluyunshuleiji || 0) + (formData.tieluyunshu || 0),
+    qicheyunshuleiji: (lastMonthData.qicheyunshuleiji || 0) + (formData.qicheyunshu || 0),
+    neiheyunshuleiji: (lastMonthData.neiheyunshuleiji || 0) + (formData.neiheyunshu || 0),
+    dixiaoleiji: (lastMonthData.dixiaoleiji || 0) + (formData.dixiao || 0),
+    ziyingtieluleiji: (lastMonthData.ziyingtieluleiji || 0) + (formData.ziyingtielu || 0),
+    kuangziyongleiji: (lastMonthData.kuangziyongleiji || 0) + (formData.kuangziyong || 0)
+  };
+});
+
+// 获取上月数据
+const fetchLastMonthData = async () => {
+  if (!formData.danweiid || !formData.nianfen || !formData.yuefen || !formData.chanpinmingcheng) {
+    resetLastMonthData();
+    return;
+  }
+  
+  try {
+    const res = await request.get('/chanpinhuoliu/lastMonth', {
+      params: {
+        danweiId: formData.danweiid,
+        nianfen: parseInt(formData.nianfen),
+        yuefen: parseInt(formData.yuefen),
+        chanpinmingcheng: formData.chanpinmingcheng
+      }
+    });
+    
+    if (res.code === '200' && res.data) {
+      const d = res.data;
+      lastMonthData.shandongshengneileiji = d.shandongshengneileiji || 0;
+      lastMonthData.shandongshengwaileiji = d.shandongshengwaileiji || 0;
+      lastMonthData.guowaileiji = d.guowaileiji || 0;
+      lastMonthData.gongsiziyongleiji = d.gongsiziyongleiji || 0;
+      lastMonthData.tieluyunshuleiji = d.tieluyunshuleiji || 0;
+      lastMonthData.qicheyunshuleiji = d.qicheyunshuleiji || 0;
+      lastMonthData.neiheyunshuleiji = d.neiheyunshuleiji || 0;
+      lastMonthData.dixiaoleiji = d.dixiaoleiji || 0;
+      lastMonthData.ziyingtieluleiji = d.ziyingtieluleiji || 0;
+      lastMonthData.kuangziyongleiji = d.kuangziyongleiji || 0;
+      
+      // 如果处于编辑模式，对于当前月的数据，我们希望
+      // 真实累计 = 当前填报的累计
+      // 所以在这里不覆盖，前端计算的 realtimeCumulative 将是:
+      // (上月累计) + 本月表单输入
+      // 恰好等于当前应该显示的累计值。
+      // 因为数据库的计算逻辑也是 `累计 = 上月累计 + 本月`
+    } else {
+      resetLastMonthData();
+    }
+  } catch (error) {
+    console.error('获取上月数据失败', error);
+    resetLastMonthData();
+  }
+};
+
+const resetLastMonthData = () => {
+  Object.keys(lastMonthData).forEach(key => lastMonthData[key] = 0);
+};
+
+// 监听参数变化，自动获取上月数据以计算累计
+watch(
+  [() => formData.danweiid, () => formData.nianfen, () => formData.yuefen, () => formData.chanpinmingcheng],
+  () => {
+    if (dialogVisible.value) {
+      fetchLastMonthData();
+    }
+  },
+  { deep: true }
+);
 
 // 加载单位列表（管理员）
 const loadUnitList = async () => {

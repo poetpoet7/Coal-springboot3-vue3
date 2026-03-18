@@ -308,70 +308,37 @@
       </div>
       
       <el-form :model="formData" label-width="160px" class="report-form">
-        <el-row :gutter="20">
-          <!-- 左列 -->
+        <el-row :gutter="40">
           <el-col :span="12">
-            <!-- 年份月份选择 -->
-            <el-form-item label="年份" v-if="!editMode">
-              <el-date-picker
-                v-model="formData.nianfen"
-                type="year"
-                placeholder="选择年份"
-                format="YYYY"
-                value-format="YYYY"
-                style="width: 100%"
-              ></el-date-picker>
-            </el-form-item>
-            <el-form-item label="月份" v-if="!editMode">
-              <el-select v-model="formData.yuefen" placeholder="请选择月份" style="width: 100%">
-                <el-option v-for="m in 12" :key="m" :label="m + '月'" :value="m"></el-option>
-              </el-select>
-            </el-form-item>
+            <el-divider content-position="left">本月数据 (编辑)</el-divider>
             
-            <el-divider content-position="left">经营总值(万元)</el-divider>
-            <el-form-item label="经营总值(计)">
-              <el-input :value="formatNumber(calculatedJingyingzongzhi)" disabled style="width: 100%">
-                <template #suffix>自动计算</template>
-              </el-input>
-            </el-form-item>
-            <el-form-item label="其中：工业产值(现价)">
+
+            <el-form-item label="工业产值(现价)">
               <el-input-number v-model="formData.gongyechanzhi" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
             </el-form-item>
             <el-form-item label="其他产值、营业额">
               <el-input-number v-model="formData.qitachanzhi" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
             </el-form-item>
-            
-            <el-divider content-position="left">新产品价值(万元)</el-divider>
             <el-form-item label="新产品价值">
               <el-input-number v-model="formData.xinchanpinjiazhi" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
             </el-form-item>
-            
-            <el-divider content-position="left">工业销售产值(万元)</el-divider>
             <el-form-item label="工业销售产值(计)">
               <el-input-number v-model="formData.gyxsczheji" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
             </el-form-item>
             <el-form-item label="其中：出口交货值">
               <el-input-number v-model="formData.chukoujiaohuozhi" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
             </el-form-item>
-            
-            <el-divider content-position="left">企业用电量(万千瓦时)</el-divider>
             <el-form-item label="企业用电量">
               <el-input-number v-model="formData.qiyeyongdianliang" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
             </el-form-item>
-            
-            <el-divider content-position="left">固定资产投资(万元)</el-divider>
             <el-form-item label="固定资产投资(合计)">
               <el-input-number v-model="formData.gdzctzheji" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
             </el-form-item>
             <el-form-item label="其中：技术改造">
               <el-input-number v-model="formData.jishugaizao" :precision="2" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
             </el-form-item>
-          </el-col>
-          
-          <!-- 右列 - 主要产品产量 -->
-          <el-col :span="12">
-            <el-divider content-position="left">主要产品产量</el-divider>
             
+            <el-divider content-position="left">主要产品产量 (本月)</el-divider>
             <el-form-item label="原煤(吨)">
               <el-input-number v-model="formData.yuanmei" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
             </el-form-item>
@@ -405,8 +372,216 @@
             <el-form-item label="合成氨(吨)">
               <el-input-number v-model="formData.hechengan" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
             </el-form-item>
+            <el-form-item label="丁醇(吨)">
+              <el-input-number v-model="formData.dingchun" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="聚甲醛(吨)">
+              <el-input-number v-model="formData.jujiaquan" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="改质沥青(吨)">
+              <el-input-number v-model="formData.gaizhiliqing" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="蒽油(吨)">
+              <el-input-number v-model="formData.enyou" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="复合肥(吨)">
+              <el-input-number v-model="formData.fuhefei" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="铝锭(吨)">
+              <el-input-number v-model="formData.lvding" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="碳素制品(吨)">
+              <el-input-number v-model="formData.tansuzhipin" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="铝铸材(吨)">
+              <el-input-number v-model="formData.lvzhucai" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="铝挤压材(吨)">
+              <el-input-number v-model="formData.lvjiyacai" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
             <el-form-item label="发电量(万千瓦时)">
               <el-input-number v-model="formData.fadianliang" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="皮带运输机(台)">
+              <el-input-number v-model="formData.pidaiyunshuji" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="输送带(M2)">
+              <el-input-number v-model="formData.shusongdai" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="电缆(米)">
+              <el-input-number v-model="formData.dianlan" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="液压支架(架)">
+              <el-input-number v-model="formData.yeyazhijia" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="刮板运输机(台)">
+              <el-input-number v-model="formData.guabanyunshuji" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="高岭土(吨)">
+              <el-input-number v-model="formData.gaolingtu" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            
+            <el-divider content-position="left">其他产品 (本月)</el-divider>
+             <el-form-item label="轻柴油(吨)">
+              <el-input-number v-model="formData.qingchaiyou" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="重柴油(吨)">
+              <el-input-number v-model="formData.zhongchaiyou" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="石脑油(吨)">
+              <el-input-number v-model="formData.shinaoyou" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="液化石油气(吨)">
+              <el-input-number v-model="formData.yehuashiyouqi" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="硫磺(吨)">
+              <el-input-number v-model="formData.liuhuang" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="硫酸铵(吨)">
+              <el-input-number v-model="formData.liuhuangan" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+            <el-form-item label="其他产品">
+              <el-input-number v-model="formData.qitachanpin" :precision="0" :controls="false" placeholder="请输入" style="width: 100%"></el-input-number>
+            </el-form-item>
+          </el-col>
+
+          <el-col :span="12">
+            <el-divider content-position="left">累计数据 (自动计算/报告值)</el-divider>
+            
+            <el-form-item label="经营总值(累计)">
+              <el-input :value="formatNumber(realtimeCumulative.jingyingzongzhileiji)" disabled style="width: 100%">
+                <template #suffix>系统自动计算</template>
+              </el-input>
+            </el-form-item>
+            <el-form-item label="工业产值(累计)">
+              <el-input :value="formatNumber(realtimeCumulative.gongyechanzhileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="其他产值(累计)">
+              <el-input :value="formatNumber(realtimeCumulative.qitachanzhileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="新产品价值(累计)">
+              <el-input :value="formatNumber(realtimeCumulative.xinchanpinjiazhileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="工业销售(累计)">
+              <el-input :value="formatNumber(realtimeCumulative.gyxsczleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="出口交货(累计)">
+              <el-input :value="formatNumber(realtimeCumulative.chukoujiaohuozhileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="用电量(累计)">
+              <el-input :value="formatLong(realtimeCumulative.qiyeyongdianliangleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="资产投资(累计)">
+              <el-input :value="formatNumber(realtimeCumulative.gdzctzleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="技术改造(累计)">
+              <el-input :value="formatNumber(realtimeCumulative.jishugaizaoleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+
+            <el-divider content-position="left">主要产品产量 (累计)</el-divider>
+            <el-form-item label="原煤(累计)">
+              <el-input :value="formatLong(realtimeCumulative.yuanmeileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="精煤(累计)">
+              <el-input :value="formatLong(realtimeCumulative.jingmeileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="尿素(累计)">
+              <el-input :value="formatLong(realtimeCumulative.niaosuleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="甲醇(累计)">
+              <el-input :value="formatLong(realtimeCumulative.jiachunleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="醋酸(累计)">
+              <el-input :value="formatLong(realtimeCumulative.cusuanleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="焦炭(累计)">
+              <el-input :value="formatLong(realtimeCumulative.jiaotanleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="醋乙酯(累计)">
+              <el-input :value="formatLong(realtimeCumulative.cusuanyizhileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="醋丁酯(累计)">
+              <el-input :value="formatLong(realtimeCumulative.cusuandingzhileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="醋酐(累计)">
+              <el-input :value="formatLong(realtimeCumulative.cuganleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="碳二甲酯(累计)">
+              <el-input :value="formatLong(realtimeCumulative.tansuanerjazhileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="合成氨(累计)">
+              <el-input :value="formatLong(realtimeCumulative.hechenganleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="丁醇(累计)">
+              <el-input :value="formatLong(realtimeCumulative.dingchunleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="聚甲醛(累计)">
+              <el-input :value="formatLong(realtimeCumulative.jujiaquanleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="改质沥青(累计)">
+              <el-input :value="formatLong(realtimeCumulative.gaizhiliqingleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="蒽油(累计)">
+              <el-input :value="formatLong(realtimeCumulative.enyouleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="复合肥(累计)">
+              <el-input :value="formatLong(realtimeCumulative.fuhefeileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="铝锭(累计)">
+              <el-input :value="formatLong(realtimeCumulative.lvdingleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="碳素制品(累计)">
+              <el-input :value="formatLong(realtimeCumulative.tansuzhipinleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="铝铸材(累计)">
+              <el-input :value="formatLong(realtimeCumulative.lvzhucaileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="铝挤压材(累计)">
+              <el-input :value="formatLong(realtimeCumulative.lvjiyacaileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="发电量(累计)">
+              <el-input :value="formatLong(realtimeCumulative.fadianliangleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="皮带机(累计)">
+              <el-input :value="formatLong(realtimeCumulative.pidaiyunshujileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="输送带(累计)">
+              <el-input :value="formatLong(realtimeCumulative.shusongdaileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="电缆(累计)">
+              <el-input :value="formatLong(realtimeCumulative.dianlanleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="液压支架(累计)">
+              <el-input :value="formatLong(realtimeCumulative.yeyazhijialeiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="刮板机(累计)">
+              <el-input :value="formatLong(realtimeCumulative.guabanyunshujileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="高岭土(累计)">
+              <el-input :value="formatLong(realtimeCumulative.gaolingtuleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+
+            <el-divider content-position="left">其他产品 (累计)</el-divider>
+            <el-form-item label="轻柴油(累计)">
+              <el-input :value="formatLong(realtimeCumulative.qingchaiiyouleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="重柴油(累计)">
+              <el-input :value="formatLong(realtimeCumulative.zhongchaiyouleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="石脑油(累计)">
+              <el-input :value="formatLong(realtimeCumulative.shinaoyouleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="液化油气(累计)">
+              <el-input :value="formatLong(realtimeCumulative.yehuashiyouqileiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="硫磺(累计)">
+              <el-input :value="formatLong(realtimeCumulative.liuhuangleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="硫酸铵(累计)">
+              <el-input :value="formatLong(realtimeCumulative.liuhuanganleiji)" disabled style="width: 100%"></el-input>
+            </el-form-item>
+            <el-form-item label="其他(累计)">
+              <el-input :value="formatLong(realtimeCumulative.qitachanpinleiji)" disabled style="width: 100%"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -423,7 +598,7 @@
 </template>
 
 <script setup>
-import { reactive, ref, onMounted, computed } from "vue";
+import { reactive, ref, onMounted, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import request from "@/utils/request.js";
 import { ElMessage, ElMessageBox } from "element-plus";
@@ -453,10 +628,65 @@ const selectedUnitInfo = computed(() => {
   return currentUnitInfo.value;
 });
 
-// 经营总值自动计算（工业产值 + 其他产值）
+// 上月累计数据缓存
+const lastMonthData = ref({});
+
+// 实时累计计算
+const realtimeCumulative = computed(() => {
+  const calc = (field, leijiField) => {
+    const current = Number(formData[field] || 0);
+    const last = Number(lastMonthData.value?.[leijiField] || 0);
+    return current + last;
+  };
+
+  const res = {
+    gongyechanzhileiji: calc('gongyechanzhi', 'gongyechanzhileiji'),
+    qitachanzhileiji: calc('qitachanzhi', 'qitachanzhileiji'),
+    xinchanpinjiazhileiji: calc('xinchanpinjiazhi', 'xinchanpinjiazhileiji'),
+    gyxsczleiji: calc('gyxsczheji', 'gyxsczleiji'),
+    chukoujiaohuozhileiji: calc('chukoujiaohuozhi', 'chukoujiaohuozhileiji'),
+    qiyeyongdianliangleiji: calc('qiyeyongdianliang', 'qiyeyongdianliangleiji'),
+    gdzctzleiji: calc('gdzctzheji', 'gdzctzleiji'),
+    jishugaizaoleiji: calc('jishugaizao', 'jishugaizaoleiji'),
+    yuanmeileiji: calc('yuanmei', 'yuanmeileiji'),
+    jingmeileiji: calc('jingmei', 'jingmeileiji'),
+    niaosuleiji: calc('niaosu', 'niaosuleiji'),
+    jiachunleiji: calc('jiachun', 'jiachunleiji'),
+    cusuanleiji: calc('cusuan', 'cusuanleiji'),
+    jiaotanleiji: calc('jiaotan', 'jiaotanleiji'),
+    cusuanyizhileiji: calc('cusuanyizhi', 'cusuanyizhileiji'),
+    cusuandingzhileiji: calc('cusuandingzhi', 'cusuandingzhileiji'),
+    cuganleiji: calc('cugan', 'cuganleiji'),
+    tansuanerjazhileiji: calc('tansuanerjiazhi', 'tansuanerjazhileiji'),
+    hechenganleiji: calc('hechengan', 'hechenganleiji'),
+    fadianliangleiji: calc('fadianliang', 'fadianliangleiji'),
+    dingchunleiji: calc('dingchun', 'dingchunleiji'),
+    jujiaquanleiji: calc('jujiaquan', 'jujiaquanleiji'),
+    gaizhiliqingleiji: calc('gaizhiliqing', 'gaizhiliqingleiji'),
+    enyouleiji: calc('enyou', 'enyouleiji'),
+    fuhefeileiji: calc('fuhefei', 'fuhefeileiji'),
+    lvdingleiji: calc('lvding', 'lvdingleiji'),
+    tansuzhipinleiji: calc('tansuzhipin', 'tansuzhipinleiji'),
+    lvzhucaileiji: calc('lvzhucai', 'lvzhucaileiji'),
+    lvjiyacaileiji: calc('lvjiyacai', 'lvjiyacaileiji'),
+    pidaiyunshujileiji: calc('pidaiyunshuji', 'pidaiyunshujileiji'),
+    shusongdaileiji: calc('shusongdai', 'shusongdaileiji'),
+    dianlanleiji: calc('dianlan', 'dianlanleiji'),
+    yeyazhijialeiji: calc('yeyazhijia', 'yeyazhijialeiji'),
+    guabanyunshujileiji: calc('guabanyunshuji', 'guabanyunshujileiji'),
+    gaolingtuleiji: calc('gaolingtu', 'gaolingtuleiji'),
+  };
+  
+  // 经营总值 = 工业产值累计 + 其他产值累计
+  res.jingyingzongzhileiji = res.gongyechanzhileiji + res.qitachanzhileiji;
+  
+  return res;
+});
+
+// 经营总值实时汇总（本月）
 const calculatedJingyingzongzhi = computed(() => {
-  const gongyechanzhi = formData.gongyechanzhi || 0;
-  const qitachanzhi = formData.qitachanzhi || 0;
+  const gongyechanzhi = Number(formData.gongyechanzhi || 0);
+  const qitachanzhi = Number(formData.qitachanzhi || 0);
   return gongyechanzhi + qitachanzhi;
 });
 
@@ -498,18 +728,23 @@ const formData = reactive({
   gdzctzheji: null,
   jishugaizao: null,
   // 主要产品产量
-  yuanmei: null,
-  jingmei: null,
-  niaosu: null,
-  jiachun: null,
-  cusuan: null,
-  jiaotan: null,
-  cusuanyizhi: null,
-  cusuandingzhi: null,
-  cugan: null,
-  tansuanerjiazhi: null,
   hechengan: null,
-  fadianliang: null
+  fadianliang: null,
+  dingchun: null,
+  jujiaquan: null,
+  gaizhiliqing: null,
+  enyou: null,
+  fuhefei: null,
+  lvding: null,
+  tansuzhipin: null,
+  lvzhucai: null,
+  lvjiyacai: null,
+  pidaiyunshuji: null,
+  shusongdai: null,
+  dianlan: null,
+  yeyazhijia: null,
+  guabanyunshuji: null,
+  gaolingtu: null
 });
 
 // 加载单位列表（管理员）
@@ -634,6 +869,7 @@ const handleEdit = (row) => {
   Object.assign(formData, row);
   formData.nianfen = row.nianfen.toString();
   
+  fetchLastMonthData(); // 获取上月数据用于对比
   dialogVisible.value = true;
 };
 
@@ -732,12 +968,35 @@ const handleConfirm = async () => {
   }
 };
 
+// 刷新上月数据
+const fetchLastMonthData = async () => {
+  if (!formData.danweiid || !formData.nianfen || !formData.yuefen) return;
+  const res = await request.get('/touzikuaibao/lastMonth', {
+    params: {
+      danweiId: formData.danweiid,
+      nianfen: formData.nianfen,
+      yuefen: formData.yuefen
+    }
+  });
+  if (res.code === '200') {
+    lastMonthData.value = res.data || {};
+  } else {
+    lastMonthData.value = {};
+  }
+};
+
+// 监听年月单位变化刷新上月数据
+watch(() => [formData.danweiid, formData.nianfen, formData.yuefen], () => {
+  if (dialogVisible.value) fetchLastMonthData();
+});
+
 // 重置表单
 const resetFormData = () => {
   formData.id = null;
   // 使用查询表单的年月作为默认值
   formData.nianfen = queryForm.nianfen || new Date().getFullYear().toString();
   formData.yuefen = queryForm.yuefen || new Date().getMonth() + 1;
+  lastMonthData.value = {};
   formData.jingyingzongzhiheji = null;
   formData.gongyechanzhi = null;
   formData.qitachanzhi = null;
@@ -759,6 +1018,21 @@ const resetFormData = () => {
   formData.tansuanerjiazhi = null;
   formData.hechengan = null;
   formData.fadianliang = null;
+  formData.dingchun = null;
+  formData.jujiaquan = null;
+  formData.gaizhiliqing = null;
+  formData.enyou = null;
+  formData.fuhefei = null;
+  formData.lvding = null;
+  formData.tansuzhipin = null;
+  formData.lvzhucai = null;
+  formData.lvjiyacai = null;
+  formData.pidaiyunshuji = null;
+  formData.shusongdai = null;
+  formData.dianlan = null;
+  formData.yeyazhijia = null;
+  formData.guabanyunshuji = null;
+  formData.gaolingtu = null;
 };
 
 // 格式化数字

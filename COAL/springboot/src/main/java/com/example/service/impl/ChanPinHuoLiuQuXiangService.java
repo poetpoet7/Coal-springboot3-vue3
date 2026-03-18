@@ -223,9 +223,9 @@ public class ChanPinHuoLiuQuXiangService {
         html.append("                <tbody id=\"infoList\">\r\n");
 
         // 计算合计
-        // 销往地区合计 = 山东省内 + 山东省外 + 国外 + 公司自用
-        BigDecimal qxBenYue = sum(t.getShandongshengnei(), t.getShandongshengwai(), t.getGuowai(), t.getGongsiziyong());
-        BigDecimal qxLeiJi = sum(t.getShandongshengneileiji(), t.getShandongshengwaileiji(), t.getGuowaileiji(), t.getGongsiziyongleiji());
+        // 销往地区合计 = 山东省内 + 山东省外 + 公司自用 ("其中:国外"包含在"山东省外"中)
+        BigDecimal qxBenYue = sum(t.getShandongshengnei(), t.getShandongshengwai(), t.getGongsiziyong());
+        BigDecimal qxLeiJi = sum(t.getShandongshengneileiji(), t.getShandongshengwaileiji(), t.getGongsiziyongleiji());
         
         // 运输方式合计 = 铁路运输 + 汽车运输(qicheyunshu) + 内河运输 + 地销 + 自营铁路 + 矿自用
         BigDecimal fsBenYue = sum(t.getTieluyunshu(), t.getQicheyunshu(), t.getNeiheyunshu(), t.getDixiao(), t.getZiyingtielu(), t.getKuangziyong());

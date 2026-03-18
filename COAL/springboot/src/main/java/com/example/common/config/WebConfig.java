@@ -17,7 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(jwtInterceptor).addPathPatterns("/**")
                 .excludePathPatterns("/")
                 .excludePathPatterns("/login", "/register", "/files/**")
-                .excludePathPatterns("/roles/selectAll", "/danwei/selectAll"); // 注册页面需要获取角色和单位列表
+                .excludePathPatterns("/roles/selectAll", "/danwei/selectAll") // 注册页面需要获取角色和单位列表
+                .excludePathPatterns("/chanpinhuoliu/export", "/tongji-module/*/export"); // 导出Excel接口放行
     }
 
 }

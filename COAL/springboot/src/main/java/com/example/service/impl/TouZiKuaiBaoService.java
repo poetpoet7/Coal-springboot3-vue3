@@ -13,6 +13,7 @@ import lombok.Data;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -486,7 +487,7 @@ public class TouZiKuaiBaoService {
      */
     private String fmtDec(BigDecimal value) {
         if (value == null || value.compareTo(BigDecimal.ZERO) == 0) return "";
-        return value.stripTrailingZeros().toPlainString();
+        return value.setScale(0, RoundingMode.HALF_UP).toPlainString();
     }
 
     /**
