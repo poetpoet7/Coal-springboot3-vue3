@@ -54,3 +54,8 @@ Desktop.ini
 *.backup
 logs/
 COAL/files/
+COAL/.claude/
+COAL/_exports_compare/
+COAL/**/*.md
+COAL/**/*.txt
+COAL/**/*.xls

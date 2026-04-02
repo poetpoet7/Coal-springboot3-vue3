@@ -210,8 +210,68 @@ const editColumns = computed(() => listColumns.value.filter(c => {
          !name.startsWith("zhuangtai");
 }));
 
+const normalizeMetricName = (name) => {
+  if (!name) return "";
+  let n = String(name).toLowerCase();
+  n = n.replace(/benyue/g, "");
+  n = n.replace(/leiji/g, "");
+  n = n.replace(/^by/, "");
+  n = n.replace(/^lj/, "");
+  return n;
+};
+
+const findColumnByNameIgnoreCase = (name) => {
+  const key = String(name || "").toLowerCase();
+  return columns.value.find(c => String(c.name || "").toLowerCase() === key);
+};
+
 const getCumulativeColumn = (baseName) => {
-  return columns.value.find(c => c.cumulative && (c.name.toLowerCase() === baseName.toLowerCase() + 'leiji' || c.name.toLowerCase() === baseName.toLowerCase() + '_leiji'));
+  const baseCol = findColumnByNameIgnoreCase(baseName);
+  if (!baseCol) return null;
+
+  const cumulativeCols = columns.value.filter(c => c.cumulative);
+  const b = String(baseCol.name || "");
+  const bLower = b.toLowerCase();
+
+  // 1) 常规后缀命名：Xxx -> XxxLeiJi / Xxx_LeiJi
+  const direct = cumulativeCols.find(c => {
+    const n = String(c.name || "").toLowerCase();
+    return n === bLower + "leiji" || n === bLower + "_leiji";
+  });
+  if (direct) return direct;
+
+  // 2) 前缀替换命名：BenYueXxx -> LeiJiXxx，BYxxx -> LJxxx
+  const transformedNames = [];
+  if (b.startsWith("BenYue")) transformedNames.push("LeiJi" + b.slice("BenYue".length));
+  if (b.startsWith("BY")) transformedNames.push("LJ" + b.slice(2));
+  if (b.includes("BenYue")) transformedNames.push(b.replace("BenYue", "LeiJi"));
+  transformedNames.push("LeiJi" + b);
+  transformedNames.push("LJ" + b);
+  for (const n of transformedNames) {
+    const hit = findColumnByNameIgnoreCase(n);
+    if (hit && hit.cumulative) return hit;
+  }
+
+  // 3) 特殊缩写/历史命名差异
+  const specialMap = {
+    ziyongxiaoshouliang: "LJZYXiaoShouLiang",
+    chukouxiaoshouliang: "LJCKXiaoShouLiang",
+    byscjyzz: "LJSCJYZZ"
+  };
+  const special = specialMap[bLower];
+  if (special) {
+    const hit = findColumnByNameIgnoreCase(special);
+    if (hit && hit.cumulative) return hit;
+  }
+
+  // 4) 标签名兜底：同一中文标签的累计列（兼容个别拼写不一致字段）
+  const byLabel = cumulativeCols.find(c => String(c.label || "").trim() && String(c.label || "").trim() === String(baseCol.label || "").trim());
+  if (byLabel) return byLabel;
+
+  // 5) 语义归一兜底
+  const normalized = normalizeMetricName(b);
+  const byNormalized = cumulativeCols.find(c => normalizeMetricName(c.name) === normalized);
+  return byNormalized || null;
 };
 
 const loadMeta = async () => {

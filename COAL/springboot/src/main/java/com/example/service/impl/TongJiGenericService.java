@@ -287,7 +287,8 @@ public class TongJiGenericService {
         List<Map<String, Object>> out = new ArrayList<>();
         if (root == null) return out;
         Map<String, Object> total = new HashMap<>();
-        total.put("xuhao", ""); total.put("danweiMingcheng", "总计"); total.put("level", 0); total.put("data", root.getData()); total.put("aggregated", root.aggregated); total.put("isTotal", true);
+        String rootName = (root.getDanwei() != null && root.getDanwei().getMingcheng() != null) ? root.getDanwei().getMingcheng() : "总计";
+        total.put("xuhao", ""); total.put("danweiMingcheng", rootName); total.put("level", 0); total.put("data", root.getData()); total.put("aggregated", root.aggregated); total.put("isTotal", true);
         out.add(total);
         for (DanweiNode c : root.children) flattenTree(c, out);
         return out;
@@ -383,21 +384,21 @@ public class TongJiGenericService {
                 return Arrays.asList("ChanPinMingCheng","JiLiangDanWei","HeDingNengLi","BenYueChanLiang","LeiJiChanLiang","QNTQChanLiang","BQNChanLiang","BenYueXiaoShouLiang","LeiJiXiaoShouLiang","LJZYXiaoShouLiang","LJCKXiaoShouLiang","QiChuKuCunLiang","QiMoKuCunLiang","BenQiPingJunJiaGe");
             case "chukouchanpin":
                 // 出口产品：产品名称→计量单位→本月止累计生产量→本月止累计出口量→出口创汇→主要出口方向→备注
-                return Arrays.asList("ChanPinMingCheng","JiLiangDanWei","LeiJiShengChanLiang","LeiJiChuKouLiang","ChuKouChuangHui","ChuKouFangXiang");
+                return Arrays.asList("ChanPinMingCheng","JiLiangDanWei","LeiJiShengChanLiang","LeiJiChuKouLiang","ChuKouChuangHui","ChuKouFangXiang","BeiZhu");
             case "zhuyaojishujingji":
                 // 主要技术经济指标：本月/累计交替排列
-                if (isLeiji) return Arrays.asList("ZengJiaZhiLeiJi","FeiMeiZengJiaZhiLeiJi","YingYeShouRuHeJiLeiJi","FeiMeiWaiXiaoLeiJi","DiYiChanYeLeiJi","DiErHeJiLeiJi","GongYeLeiJi","FeiMeiGongYeLeiJi","JianZhuYeLeiJi","DiSanChanYeLeiJi","LiShuiHeJiLeiJi","LiRunLeiJi","FeiMeiLiRenLeiJi","ShuiJinLeiJi","FeiMeiShuiJinLeiJi","CYRYLDBaoChouLeiJi","QYJZXiaoLvLeiJi","PJCYRenYuanLeiJi","ZhuYingYeWuLeiJi");
-                else return Arrays.asList("ZengJiaZhi","FeiMeiZengJiaZhi","YingYeShouRuHeJi","FeiMeiWaiXiao","DiYiChanYe","DiErHeJi","GongYe","FeiMeiGongYe","JianZhuYe","DiSanChanYe","LiShuiHeJi","LiRun","FeiMeiLiRun","ShuiJin","FeiMeiShuiJin","CYRYLDBaoChou","QYJZXiaoLv","PJCYRenYuan","BenYueZongJi","ZhuYingYeWu");
+                if (isLeiji) return Arrays.asList("ZengJiaZhiLeiJi","YingYeShouRuHeJiLeiJi","ZhuYingYeWuLeiJi","FeiMeiWaiXiaoLeiJi","LiShuiHeJiLeiJi","LiRunLeiJi","ShuiJinLeiJi","CYRYLDBaoChouLeiJi","QYJZXiaoLvLeiJi","PJCYRenYuanLeiJi");
+                else return Arrays.asList("ZengJiaZhi","YingYeShouRuHeJi","ZhuYingYeWu","FeiMeiWaiXiao","LiShuiHeJi","LiRun","ShuiJin","CYRYLDBaoChou","QYJZXiaoLv","PJCYRenYuan");
             case "dianlijishu":
                 // 电力技术指标：本月/累计成对排列
                 if (isLeiji) return Arrays.asList("FaDianLiangLeiJi","GongDianLiangHeJiLeiJi","KuangYongDianLiangLeiJi","ShangWangDianLiangLeiJi","GongReLiangLeiJi","MeiNiLiangLeiJi","MeiGanShiLiangLeiJi","XiZhongMeiLiangLeiJi","FaDianChengBenLeiJi","DianLiangShouRuLeiJi","LiRuiLeiJi");
-                else return Arrays.asList("FaDianLiang","FaDianLiangLeiJi","GongDianLiangHeJi","GongDianLiangHeJiLeiJi","KuangYongDianLiang","KuangYongDianLiangLeiJi","ShangWangDianLiang","ShangWangDianLiangLeiJi","GongReLiang","GongReLiangLeiJi","MeiNiLiang","MeiNiLiangLeiJi","MeiGanShiLiang","MeiGanShiLiangLeiJi","XiZhongMeiLiang","XiZhongMeiLiangLeiJi","FaDianChengBen","FaDianChengBenLeiJi","DianLiangShouRu","DianLiangShouRuLeiJi","LiRui","LiRuiLeiJi");
+                else return Arrays.asList("FaDianLiang","GongDianLiangHeJi","KuangYongDianLiang","ShangWangDianLiang","GongReLiang","MeiNiLiang","MeiGanShiLiang","XiZhongMeiLiang","FaDianChengBen","DianLiangShouRu","LiRui");
             case "huagongyewu":
                 // 化工业务指标：品种→计量单位→本月完成→累计完成→上年同期→比上年%→成本单位→成本本月→成本累计→开工率单位→开工率本月→开工率累计
                 return Arrays.asList("PinZhong","JiLiangDanWei","BenYueWC","LeiJiWC","ShangNianTongQi","BiShangNian","SCChengBenDanWei","SCChengBenBenYue","SCChengBenLeiJi","KaiGongLvDanWei","KaiGongLvBenYue","KaiGongLvLeiJi");
             case "feimeilaodonggongzi":
                 // 非煤劳动工资：人数(合计→一产→二产→工业→建筑→三产)→本月(平均人数→工资总额→平均工资)→累计(平均人数→工资总额→平均工资)→女职工→管理人员→专业人员→全民→集体→其他
-                return Arrays.asList("RenShuHeJi","YiChanYe","ErChanYe","ErChanYeGongYe","ErChanYeJianZhuYe","SanChanYe","BenYuePingJunRenShu","BenYueGongZiZongE","BenYuePingJunGongZi","LeiJiPingJunRenShu","LeiJiGongZiZongE","LeiJiPingJunGongZi","NvZhiGong","GuanLiRenYuan","ZhuanYeRenYuan","QuanMin","JiTi","QiTa");
+                return Arrays.asList("RenShuHeJi","NvZhiGong","GuanLiRenYuan","ZhuanYeRenYuan","QuanMin","JiTi","QiTa","YiChanYe","ErChanYe","ErChanYeGongYe","ErChanYeJianZhuYe","SanChanYe","BenYuePingJunRenShu","LeiJiPingJunRenShu","BenYueGongZiZongE","LeiJiGongZiZongE","BenYuePingJunGongZi","LeiJiPingJunGongZi");
             default:
                 return getReportDisplayColumns(getModule(moduleKey), leibie);
         }
@@ -408,6 +409,18 @@ public class TongJiGenericService {
         // 通用边框样式缩写
         String bt = "border-top:.03cm solid #000;"; String bl = "border-left:.03cm solid black;"; String bb = "border-bottom:.03cm solid black;";
         boolean isLeiji = LEIJI.equals(leibie);
+        if ("zhuyaojishujingji".equals(moduleKey)) {
+            appendZhuyaojishujingjiHeader(html, unitName, ym, bt, bl, bb, isLeiji);
+            return;
+        }
+        if ("dianlijishu".equals(moduleKey)) {
+            appendDianlijishuHeader(html, unitName, ym, bt, bl, bb, dataCols.size() + 2);
+            return;
+        }
+        if ("feimeilaodonggongzi".equals(moduleKey)) {
+            appendFeimeiLaodonggongziHeader(html, unitName, ym, bt, bl, bb);
+            return;
+        }
         switch (moduleKey) {
             case "jingyingzongzhi": {
                 int nc = 16; // 序号+单位+14数据列
@@ -631,6 +644,76 @@ public class TongJiGenericService {
         }
     }
 
+    private void appendZhuyaojishujingjiHeader(StringBuilder html, String unitName, String ym, String bt, String bl, String bb, boolean isLeiji) {
+        int nc = 12;
+        String title = isLeiji ? "主要技术经济指标(累计)" : "主要技术经济指标(本月)";
+        html.append("<tr><th colspan='").append(nc).append("' align='center' style='font-size:xx-large;border:0;'>").append(title).append("</th></tr>");
+        html.append("<tr><th colspan='2' align='left' style='border:0;font-size:13px;'>编制单位：").append(unitName).append("</th>");
+        html.append("<th colspan='8' align='center' style='border:0;font-size:13px;'>").append(ym).append("</th>");
+        html.append("<th colspan='2' align='right' style='border:0;font-size:13px;'></th></tr>");
+        html.append("<tr>");
+        html.append("<th rowspan='2' style='height:1.6cm;width:0.9cm;").append(bt).append("border-left-width:0;").append(bb).append("'>序号</th>");
+        html.append("<th rowspan='2' style='width:3cm;").append(bt).append(bl).append(bb).append("'>单位名称</th>");
+        html.append("<th rowspan='2' style='width:1.5cm;").append(bt).append(bl).append(bb).append("'>工业增加值</th>");
+        html.append("<th colspan='3' style='").append(bt).append(bl).append(bb).append("'>营业（销售）收入</th>");
+        html.append("<th colspan='3' style='").append(bt).append(bl).append(bb).append("'>利税合计(预计）</th>");
+        html.append("<th rowspan='2' style='width:1.6cm;").append(bt).append(bl).append(bb).append("'>从业人员<br>劳动报酬</th>");
+        html.append("<th rowspan='2' style='width:1.8cm;").append(bt).append(bl).append(bb).append("'>全员价值效率<br>(万元/人)</th>");
+        html.append("<th rowspan='2' style='width:1.6cm;").append(bt).append(bl).append(bb).append("'>平均从业<br>人员(人)</th>");
+        html.append("</tr><tr>");
+        html.append("<th style='").append(bl).append(bb).append("'>计</th>");
+        html.append("<th style='").append(bl).append(bb).append("'>主营业务销售收入</th>");
+        html.append("<th style='").append(bl).append(bb).append("'>其它业务销售收入</th>");
+        html.append("<th style='").append(bl).append(bb).append("'>计</th>");
+        html.append("<th style='").append(bl).append(bb).append("'>利润</th>");
+        html.append("<th style='").append(bl).append(bb).append("'>税金</th>");
+        html.append("</tr>");
+    }
+
+    private void appendDianlijishuHeader(StringBuilder html, String unitName, String ym, String bt, String bl, String bb, int nc) {
+        html.append("<tr><th colspan='").append(nc).append("' align='center' style='font-size:xx-large;border:0;'>电力企业主营业务技术指标</th></tr>");
+        html.append("<tr><th colspan='2' align='left' style='border:0;font-size:13px;'>编制单位：").append(unitName).append("</th>");
+        html.append("<th colspan='9' align='center' style='border:0;font-size:13px;'>").append(ym).append("</th>");
+        html.append("<th colspan='2' align='right' style='border:0;font-size:13px;'></th></tr>");
+        html.append("<tr>");
+        html.append("<th rowspan='2' style='height:1.5cm;width:0.9cm;").append(bt).append("border-left-width:0;").append(bb).append("'>序号</th>");
+        html.append("<th rowspan='2' style='width:3cm;").append(bt).append(bl).append(bb).append("'>单位名称</th>");
+        html.append("<th rowspan='2' style='width:1.6cm;").append(bt).append(bl).append(bb).append("'>发电量<br>(万千瓦时)</th>");
+        html.append("<th colspan='3' style='").append(bt).append(bl).append(bb).append("'>供电量</th>");
+        html.append("<th rowspan='2' style='width:1.6cm;").append(bt).append(bl).append(bb).append("'>供热量<br>蒸吨</th>");
+        html.append("<th colspan='3' style='").append(bt).append(bl).append(bb).append("'>发电耗用</th>");
+        html.append("<th rowspan='2' style='width:1.6cm;").append(bt).append(bl).append(bb).append("'>发电成本<br>(元/千瓦时)</th>");
+        html.append("<th rowspan='2' style='width:1.6cm;").append(bt).append(bl).append(bb).append("'>电量收入<br>(万元)</th>");
+        html.append("<th rowspan='2' style='width:1.6cm;").append(bt).append(bl).append(bb).append("'>利润<br>(万元)</th>");
+        html.append("</tr><tr>");
+        html.append("<th style='").append(bl).append(bb).append("'>合计(万千瓦时)</th>");
+        html.append("<th style='").append(bl).append(bb).append("'>矿用电量(万千瓦时)</th>");
+        html.append("<th style='").append(bl).append(bb).append("'>上网电量(万千瓦时)</th>");
+        html.append("<th style='").append(bl).append(bb).append("'>煤泥量(吨)</th>");
+        html.append("<th style='").append(bl).append(bb).append("'>煤矸石量(吨)</th>");
+        html.append("<th style='").append(bl).append(bb).append("'>洗中煤(吨)</th>");
+        html.append("</tr>");
+    }
+
+    private void appendFeimeiLaodonggongziHeader(StringBuilder html, String unitName, String ym, String bt, String bl, String bb) {
+        int nc = 20;
+        html.append("<tr><th colspan='").append(nc).append("' align='center' style='font-size:xx-large;border:0;'>非煤产业劳动工资统计表</th></tr>");
+        html.append("<tr><th colspan='2' align='left' style='border:0;font-size:13px;'>编制单位：").append(unitName).append("</th>");
+        html.append("<th colspan='16' align='center' style='border:0;font-size:13px;'>").append(ym).append("</th>");
+        html.append("<th colspan='2' align='right' style='border:0;font-size:13px;'></th></tr>");
+        html.append("<tr>");
+        html.append("<th rowspan='2' style='height:1.6cm;width:0.9cm;").append(bt).append("border-left-width:0;").append(bb).append("'>序号</th>");
+        html.append("<th rowspan='2' style='width:3cm;").append(bt).append(bl).append(bb).append("'>单位名称</th>");
+        html.append("<th colspan='12' style='").append(bt).append(bl).append(bb).append("'>人数</th>");
+        html.append("<th colspan='2' style='").append(bt).append(bl).append(bb).append("'>平均人数</th>");
+        html.append("<th colspan='2' style='").append(bt).append(bl).append(bb).append("'>工资总额(万元)</th>");
+        html.append("<th colspan='2' style='").append(bt).append(bl).append(bb).append("'>平均工资（元）</th>");
+        html.append("</tr><tr>");
+        String[] labels = {"合计","其中：女职工","管理人员","专业人员","其中：全民","集体","其他","第一产业","第二产业","其中：工业","建筑业","第三产业","本月","累计","本月","累计","本月","累计"};
+        for (String l : labels) html.append("<th style='").append(bl).append(bb).append("'>").append(l).append("</th>");
+        html.append("</tr>");
+    }
+
     public String buildExportFileName(String moduleKey, Integer nianfen, Integer yuefen, String leibie) {
         String fileName = nianfen + "年" + (yuefen == null ? 1 : yuefen) + "月" + getModule(moduleKey).name + "(" + (leibie == null ? BENYUE : leibie) + ").xls";
         return URLEncoder.encode(fileName, StandardCharsets.UTF_8).replace("+", "%20");
@@ -675,10 +758,14 @@ public class TongJiGenericService {
     }
 
     private Map<String, Object> getLastMonthData(ModuleConfig m, Integer danweiId, Integer nianfen, Integer yuefen, Map<String, Object> filters) {
-        int ly = nianfen, lm = yuefen - 1; if (lm < 1) { lm = 12; ly--; }
+        if (yuefen == null || yuefen <= 1) return null;
         MapSqlParameterSource p = new MapSqlParameterSource();
-        StringBuilder sql = new StringBuilder("SELECT TOP 1 * FROM " + q(m.tableName) + " WHERE [DanWeiID]=:d AND [NianFen]=:n AND [YueFen]=:y");
-        p.addValue("d", danweiId); p.addValue("n", ly); p.addValue("y", lm); appendDimensions(m, filters, sql, p); sql.append(" ORDER BY [ID] DESC");
+        StringBuilder sql = new StringBuilder("SELECT TOP 1 * FROM " + q(m.tableName) + " WHERE [DanWeiID]=:d AND [NianFen]=:n AND [YueFen] < :y");
+        p.addValue("d", danweiId);
+        p.addValue("n", nianfen);
+        p.addValue("y", yuefen);
+        appendDimensions(m, filters, sql, p);
+        sql.append(" ORDER BY [YueFen] DESC, [ID] DESC");
         List<Map<String, Object>> rows = namedJdbc.queryForList(sql.toString(), p);
         return rows.isEmpty() ? null : rows.get(0);
     }
@@ -772,7 +859,26 @@ public class TongJiGenericService {
     private Map<String, Object> aggregateChildrenData(ModuleConfig m, List<DanweiNode> children) {
         Map<String, Object> out = new HashMap<>(); Set<String> numeric = getNumericColumns(m.tableName);
         for (DanweiNode c : children) if (c.data != null) mergeRowInto(out, c.data, numeric);
+        recalcDerivedAfterAggregate(m, out);
         return out;
+    }
+
+    private void recalcDerivedAfterAggregate(ModuleConfig m, Map<String, Object> row) {
+        if (m == null || row == null) return;
+        if ("feimeilaodonggongzi".equals(m.key)) {
+            BigDecimal byRenShu = toBd(get(row, "BenYuePingJunRenShu"));
+            BigDecimal byGongZi = toBd(get(row, "BenYueGongZiZongE"));
+            BigDecimal ljRenShu = toBd(get(row, "LeiJiPingJunRenShu"));
+            BigDecimal ljGongZi = toBd(get(row, "LeiJiGongZiZongE"));
+
+            put(row, "BenYuePingJunGongZi", calcAvgSalary(byGongZi, byRenShu));
+            put(row, "LeiJiPingJunGongZi", calcAvgSalary(ljGongZi, ljRenShu));
+        }
+    }
+
+    private BigDecimal calcAvgSalary(BigDecimal wageWanYuan, BigDecimal avgPeople) {
+        if (wageWanYuan == null || avgPeople == null || avgPeople.compareTo(BigDecimal.ZERO) == 0) return BigDecimal.ZERO;
+        return wageWanYuan.multiply(new BigDecimal("10000")).divide(avgPeople, 0, RoundingMode.HALF_UP);
     }
 
     private void flattenTree(DanweiNode n, List<Map<String, Object>> out) {
@@ -810,8 +916,18 @@ public class TongJiGenericService {
         return colCache.computeIfAbsent(tableName, t -> jdbcTemplate.query(
                 "SELECT COLUMN_NAME, DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA='dbo' AND TABLE_NAME=? ORDER BY ORDINAL_POSITION",
                 (rs, i) -> new ColumnMeta(rs.getString(1), rs.getString(2), isNum(rs.getString(2)), isStr(rs.getString(2)),
-                        rs.getString(1) != null && rs.getString(1).toLowerCase().endsWith("leiji"), getLabel(rs.getString(1))),
+                        isCumulativeColumn(rs.getString(1)), getLabel(rs.getString(1))),
                 t));
+    }
+
+    private boolean isCumulativeColumn(String columnName) {
+        if (columnName == null) return false;
+        String n = columnName.toLowerCase();
+        // 兼容历史命名：
+        // 1) XxxLeiJi（后缀）
+        // 2) LeiJiXxx（前缀）
+        // 3) LJXxx（缩写前缀，如 LJZYXiaoShouLiang / LJSCJYZZ）
+        return n.endsWith("leiji") || n.startsWith("leiji") || n.startsWith("lj");
     }
 
     private void appendDimensions(ModuleConfig m, Map<String, Object> filters, StringBuilder sql, MapSqlParameterSource p) {
@@ -832,7 +948,15 @@ public class TongJiGenericService {
     private String q(String n) { return "[" + n + "]"; }
     private boolean canEdit(String s) { return s == null || s.isEmpty() || "待上报".equals(s) || "返回修改".equals(s); }
     private String normStatus(Object o) { if (o == null) return null; String s = String.valueOf(o).trim(); return s.isEmpty() ? null : s; }
-    private String fmt(Object o) { if (o == null) return ""; if (o instanceof Number) { BigDecimal b = toBd(o).setScale(0, RoundingMode.HALF_UP); return b.compareTo(BigDecimal.ZERO) == 0 ? "" : b.toPlainString(); } return String.valueOf(o); }
+    private String fmt(Object o) {
+        if (o == null) return "";
+        if (o instanceof Number) {
+            BigDecimal b = toBd(o);
+            if (b.compareTo(BigDecimal.ZERO) == 0) return "";
+            return b.stripTrailingZeros().toPlainString();
+        }
+        return String.valueOf(o);
+    }
     private boolean isNum(String t) { if (t == null) return false; String x = t.toLowerCase(); return x.contains("int") || x.contains("decimal") || x.contains("numeric") || x.contains("float") || x.contains("real") || x.contains("money"); }
     private boolean isStr(String t) { if (t == null) return false; String x = t.toLowerCase(); return x.contains("char") || x.contains("text") || x.contains("nchar") || x.contains("nvarchar"); }
     private Integer toInt(Object o) { if (o == null) return null; if (o instanceof Number) return ((Number) o).intValue(); try { return Integer.parseInt(String.valueOf(o)); } catch (Exception e) { return null; } }

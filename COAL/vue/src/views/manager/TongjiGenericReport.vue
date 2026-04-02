@@ -185,6 +185,9 @@
           <el-table-column label="主要出口方向" min-width="160" align="center">
             <template v-slot="scope">{{ (scope.row.data || {}).ChuKouFangXiang || '' }}</template>
           </el-table-column>
+          <el-table-column label="备注" min-width="140" align="center">
+            <template v-slot="scope">{{ (scope.row.data || {}).BeiZhu || '' }}</template>
+          </el-table-column>
         </template>
 
         <!-- ========== 主要技术经济指标 zhuyaojishujingji ========== -->
@@ -193,67 +196,39 @@
           <el-table-column label="单位名称" width="180" fixed>
             <template v-slot="scope"><span :style="unitStyle(scope.row)">{{ scope.row.danweiMingcheng }}</span></template>
           </el-table-column>
-          <el-table-column :label="isLeiji ? '累计' : '本月'">
-            <el-table-column label="增加值" min-width="100" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'ZengJiaZhiLeiJi' : 'ZengJiaZhi')) }}</template>
-            </el-table-column>
-            <el-table-column label="非煤增加值" min-width="110" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'FeiMeiZengJiaZhiLeiJi' : 'FeiMeiZengJiaZhi')) }}</template>
-            </el-table-column>
-            <el-table-column label="营业收入合计" min-width="110" align="right">
+          <el-table-column label="工业增加值" min-width="100" align="right">
+            <template v-slot="scope">{{ format(d(scope, isLeiji ? 'ZengJiaZhiLeiJi' : 'ZengJiaZhi')) }}</template>
+          </el-table-column>
+          <el-table-column label="营业（销售）收入" align="center">
+            <el-table-column label="计" min-width="110" align="right">
               <template v-slot="scope">{{ format(d(scope, isLeiji ? 'YingYeShouRuHeJiLeiJi' : 'YingYeShouRuHeJi')) }}</template>
             </el-table-column>
-            <el-table-column label="非煤外销" min-width="100" align="right">
+            <el-table-column label="主营业务销售收入" min-width="140" align="right">
+              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'ZhuYingYeWuLeiJi' : 'ZhuYingYeWu')) }}</template>
+            </el-table-column>
+            <el-table-column label="其它业务销售收入" min-width="140" align="right">
               <template v-slot="scope">{{ format(d(scope, isLeiji ? 'FeiMeiWaiXiaoLeiJi' : 'FeiMeiWaiXiao')) }}</template>
             </el-table-column>
-            <el-table-column label="第一产业" min-width="100" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'DiYiChanYeLeiJi' : 'DiYiChanYe')) }}</template>
-            </el-table-column>
-            <el-table-column label="第二合计" min-width="100" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'DiErHeJiLeiJi' : 'DiErHeJi')) }}</template>
-            </el-table-column>
-            <el-table-column label="工业" min-width="100" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'GongYeLeiJi' : 'GongYe')) }}</template>
-            </el-table-column>
-            <el-table-column label="非煤工业" min-width="100" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'FeiMeiGongYeLeiJi' : 'FeiMeiGongYe')) }}</template>
-            </el-table-column>
-            <el-table-column label="建筑业" min-width="100" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'JianZhuYeLeiJi' : 'JianZhuYe')) }}</template>
-            </el-table-column>
-            <el-table-column label="第三产业" min-width="100" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'DiSanChanYeLeiJi' : 'DiSanChanYe')) }}</template>
-            </el-table-column>
-            <el-table-column label="利税合计" min-width="100" align="right">
+          </el-table-column>
+          <el-table-column label="利税合计(预计）" align="center">
+            <el-table-column label="计" min-width="100" align="right">
               <template v-slot="scope">{{ format(d(scope, isLeiji ? 'LiShuiHeJiLeiJi' : 'LiShuiHeJi')) }}</template>
             </el-table-column>
             <el-table-column label="利润" min-width="100" align="right">
               <template v-slot="scope">{{ format(d(scope, isLeiji ? 'LiRunLeiJi' : 'LiRun')) }}</template>
             </el-table-column>
-            <el-table-column label="非煤利润" min-width="100" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'FeiMeiLiRenLeiJi' : 'FeiMeiLiRun')) }}</template>
-            </el-table-column>
             <el-table-column label="税金" min-width="100" align="right">
               <template v-slot="scope">{{ format(d(scope, isLeiji ? 'ShuiJinLeiJi' : 'ShuiJin')) }}</template>
             </el-table-column>
-            <el-table-column label="非煤税金" min-width="100" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'FeiMeiShuiJinLeiJi' : 'FeiMeiShuiJin')) }}</template>
-            </el-table-column>
-            <el-table-column label="从业人员劳动报酬" min-width="130" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'CYRYLDBaoChouLeiJi' : 'CYRYLDBaoChou')) }}</template>
-            </el-table-column>
-            <el-table-column label="企业净资产效率" min-width="120" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'QYJZXiaoLvLeiJi' : 'QYJZXiaoLv')) }}</template>
-            </el-table-column>
-            <el-table-column label="平均从业人员" min-width="110" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'PJCYRenYuanLeiJi' : 'PJCYRenYuan')) }}</template>
-            </el-table-column>
-            <el-table-column v-if="!isLeiji" label="本月总计" min-width="100" align="right">
-              <template v-slot="scope">{{ format(d(scope, 'BenYueZongJi')) }}</template>
-            </el-table-column>
-            <el-table-column label="主营业务" min-width="100" align="right">
-              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'ZhuYingYeWuLeiJi' : 'ZhuYingYeWu')) }}</template>
-            </el-table-column>
+          </el-table-column>
+          <el-table-column label="从业人员劳动报酬" min-width="140" align="right">
+            <template v-slot="scope">{{ format(d(scope, isLeiji ? 'CYRYLDBaoChouLeiJi' : 'CYRYLDBaoChou')) }}</template>
+          </el-table-column>
+          <el-table-column label="全员价值效率(万元/人)" min-width="170" align="right">
+            <template v-slot="scope">{{ format(d(scope, isLeiji ? 'QYJZXiaoLvLeiJi' : 'QYJZXiaoLv')) }}</template>
+          </el-table-column>
+          <el-table-column label="平均从业人员(人)" min-width="140" align="right">
+            <template v-slot="scope">{{ format(d(scope, isLeiji ? 'PJCYRenYuanLeiJi' : 'PJCYRenYuan')) }}</template>
           </el-table-column>
         </template>
 
@@ -263,67 +238,43 @@
           <el-table-column label="单位名称" width="180" fixed>
             <template v-slot="scope"><span :style="unitStyle(scope.row)">{{ scope.row.danweiMingcheng }}</span></template>
           </el-table-column>
-          <template v-if="isLeiji">
-            <!-- 累计模式：单列 -->
-            <el-table-column label="发电量" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'FaDianLiangLeiJi')) }}</template></el-table-column>
-            <el-table-column label="供电量合计" min-width="110" align="right"><template v-slot="scope">{{ format(d(scope, 'GongDianLiangHeJiLeiJi')) }}</template></el-table-column>
-            <el-table-column label="矿用电量" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'KuangYongDianLiangLeiJi')) }}</template></el-table-column>
-            <el-table-column label="上网电量" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'ShangWangDianLiangLeiJi')) }}</template></el-table-column>
-            <el-table-column label="供热量" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'GongReLiangLeiJi')) }}</template></el-table-column>
-            <el-table-column label="煤泥量" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'MeiNiLiangLeiJi')) }}</template></el-table-column>
-            <el-table-column label="煤矸石量" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'MeiGanShiLiangLeiJi')) }}</template></el-table-column>
-            <el-table-column label="洗中煤量" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'XiZhongMeiLiangLeiJi')) }}</template></el-table-column>
-            <el-table-column label="发电成本" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'FaDianChengBenLeiJi')) }}</template></el-table-column>
-            <el-table-column label="电量收入" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'DianLiangShouRuLeiJi')) }}</template></el-table-column>
-            <el-table-column label="利润" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'LiRuiLeiJi')) }}</template></el-table-column>
-          </template>
-          <template v-else>
-            <!-- 本月模式：本月/累计成对 -->
-            <el-table-column label="发电量">
-              <el-table-column label="本月" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'FaDianLiang')) }}</template></el-table-column>
-              <el-table-column label="累计" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'FaDianLiangLeiJi')) }}</template></el-table-column>
+          <el-table-column label="发电量(万千瓦时)" min-width="110" align="right">
+            <template v-slot="scope">{{ format(d(scope, isLeiji ? 'FaDianLiangLeiJi' : 'FaDianLiang')) }}</template>
+          </el-table-column>
+          <el-table-column label="供电量" align="center">
+            <el-table-column label="合计(万千瓦时)" min-width="120" align="right">
+              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'GongDianLiangHeJiLeiJi' : 'GongDianLiangHeJi')) }}</template>
             </el-table-column>
-            <el-table-column label="供电量合计">
-              <el-table-column label="本月" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'GongDianLiangHeJi')) }}</template></el-table-column>
-              <el-table-column label="累计" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'GongDianLiangHeJiLeiJi')) }}</template></el-table-column>
+            <el-table-column label="矿用电量(万千瓦时)" min-width="140" align="right">
+              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'KuangYongDianLiangLeiJi' : 'KuangYongDianLiang')) }}</template>
             </el-table-column>
-            <el-table-column label="矿用电量">
-              <el-table-column label="本月" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'KuangYongDianLiang')) }}</template></el-table-column>
-              <el-table-column label="累计" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'KuangYongDianLiangLeiJi')) }}</template></el-table-column>
+            <el-table-column label="上网电量(万千瓦时)" min-width="140" align="right">
+              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'ShangWangDianLiangLeiJi' : 'ShangWangDianLiang')) }}</template>
             </el-table-column>
-            <el-table-column label="上网电量">
-              <el-table-column label="本月" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'ShangWangDianLiang')) }}</template></el-table-column>
-              <el-table-column label="累计" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'ShangWangDianLiangLeiJi')) }}</template></el-table-column>
+          </el-table-column>
+          <el-table-column label="供热量 蒸吨" min-width="110" align="right">
+            <template v-slot="scope">{{ format(d(scope, isLeiji ? 'GongReLiangLeiJi' : 'GongReLiang')) }}</template>
+          </el-table-column>
+          <el-table-column label="发电耗用" align="center">
+            <el-table-column label="煤泥量(吨)" min-width="110" align="right">
+              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'MeiNiLiangLeiJi' : 'MeiNiLiang')) }}</template>
             </el-table-column>
-            <el-table-column label="供热量">
-              <el-table-column label="本月" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'GongReLiang')) }}</template></el-table-column>
-              <el-table-column label="累计" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'GongReLiangLeiJi')) }}</template></el-table-column>
+            <el-table-column label="煤矸石量(吨)" min-width="120" align="right">
+              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'MeiGanShiLiangLeiJi' : 'MeiGanShiLiang')) }}</template>
             </el-table-column>
-            <el-table-column label="煤泥量">
-              <el-table-column label="本月" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'MeiNiLiang')) }}</template></el-table-column>
-              <el-table-column label="累计" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'MeiNiLiangLeiJi')) }}</template></el-table-column>
+            <el-table-column label="洗中煤(吨)" min-width="110" align="right">
+              <template v-slot="scope">{{ format(d(scope, isLeiji ? 'XiZhongMeiLiangLeiJi' : 'XiZhongMeiLiang')) }}</template>
             </el-table-column>
-            <el-table-column label="煤矸石量">
-              <el-table-column label="本月" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'MeiGanShiLiang')) }}</template></el-table-column>
-              <el-table-column label="累计" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'MeiGanShiLiangLeiJi')) }}</template></el-table-column>
-            </el-table-column>
-            <el-table-column label="洗中煤量">
-              <el-table-column label="本月" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'XiZhongMeiLiang')) }}</template></el-table-column>
-              <el-table-column label="累计" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'XiZhongMeiLiangLeiJi')) }}</template></el-table-column>
-            </el-table-column>
-            <el-table-column label="发电成本">
-              <el-table-column label="本月" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'FaDianChengBen')) }}</template></el-table-column>
-              <el-table-column label="累计" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'FaDianChengBenLeiJi')) }}</template></el-table-column>
-            </el-table-column>
-            <el-table-column label="电量收入">
-              <el-table-column label="本月" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'DianLiangShouRu')) }}</template></el-table-column>
-              <el-table-column label="累计" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'DianLiangShouRuLeiJi')) }}</template></el-table-column>
-            </el-table-column>
-            <el-table-column label="利润">
-              <el-table-column label="本月" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'LiRui')) }}</template></el-table-column>
-              <el-table-column label="累计" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'LiRuiLeiJi')) }}</template></el-table-column>
-            </el-table-column>
-          </template>
+          </el-table-column>
+          <el-table-column label="发电成本(元/千瓦时)" min-width="150" align="right">
+            <template v-slot="scope">{{ format(d(scope, isLeiji ? 'FaDianChengBenLeiJi' : 'FaDianChengBen')) }}</template>
+          </el-table-column>
+          <el-table-column label="电量收入(万元)" min-width="120" align="right">
+            <template v-slot="scope">{{ format(d(scope, isLeiji ? 'DianLiangShouRuLeiJi' : 'DianLiangShouRu')) }}</template>
+          </el-table-column>
+          <el-table-column label="利润(万元)" min-width="100" align="right">
+            <template v-slot="scope">{{ format(d(scope, isLeiji ? 'LiRuiLeiJi' : 'LiRui')) }}</template>
+          </el-table-column>
         </template>
 
         <!-- ========== 化工业务指标 huagongyewu ========== -->
@@ -382,33 +333,31 @@
           <el-table-column label="单位名称" width="180" fixed>
             <template v-slot="scope"><span :style="unitStyle(scope.row)">{{ scope.row.danweiMingcheng }}</span></template>
           </el-table-column>
-          <el-table-column label="期末人数">
+          <el-table-column label="人数" align="center">
             <el-table-column label="合计" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'RenShuHeJi')) }}</template></el-table-column>
-            <el-table-column label="一产业" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'YiChanYe')) }}</template></el-table-column>
-            <el-table-column label="二产业" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'ErChanYe')) }}</template></el-table-column>
-            <el-table-column label="工业" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'ErChanYeGongYe')) }}</template></el-table-column>
-            <el-table-column label="建筑业" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'ErChanYeJianZhuYe')) }}</template></el-table-column>
-            <el-table-column label="三产业" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'SanChanYe')) }}</template></el-table-column>
-          </el-table-column>
-          <el-table-column label="本月">
-            <el-table-column label="平均人数" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'BenYuePingJunRenShu')) }}</template></el-table-column>
-            <el-table-column label="工资总额" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'BenYueGongZiZongE')) }}</template></el-table-column>
-            <el-table-column label="平均工资" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'BenYuePingJunGongZi')) }}</template></el-table-column>
-          </el-table-column>
-          <el-table-column label="累计">
-            <el-table-column label="平均人数" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'LeiJiPingJunRenShu')) }}</template></el-table-column>
-            <el-table-column label="工资总额" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'LeiJiGongZiZongE')) }}</template></el-table-column>
-            <el-table-column label="平均工资" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'LeiJiPingJunGongZi')) }}</template></el-table-column>
-          </el-table-column>
-          <el-table-column label="参考指标">
-            <el-table-column label="女职工" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'NvZhiGong')) }}</template></el-table-column>
+            <el-table-column label="其中：女职工" min-width="110" align="right"><template v-slot="scope">{{ format(d(scope, 'NvZhiGong')) }}</template></el-table-column>
             <el-table-column label="管理人员" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'GuanLiRenYuan')) }}</template></el-table-column>
             <el-table-column label="专业人员" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'ZhuanYeRenYuan')) }}</template></el-table-column>
-          </el-table-column>
-          <el-table-column label="按所有制分">
-            <el-table-column label="全民" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'QuanMin')) }}</template></el-table-column>
+            <el-table-column label="其中：全民" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'QuanMin')) }}</template></el-table-column>
             <el-table-column label="集体" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'JiTi')) }}</template></el-table-column>
             <el-table-column label="其他" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'QiTa')) }}</template></el-table-column>
+            <el-table-column label="第一产业" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'YiChanYe')) }}</template></el-table-column>
+            <el-table-column label="第二产业" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'ErChanYe')) }}</template></el-table-column>
+            <el-table-column label="其中：工业" min-width="110" align="right"><template v-slot="scope">{{ format(d(scope, 'ErChanYeGongYe')) }}</template></el-table-column>
+            <el-table-column label="建筑业" min-width="90" align="right"><template v-slot="scope">{{ format(d(scope, 'ErChanYeJianZhuYe')) }}</template></el-table-column>
+            <el-table-column label="第三产业" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'SanChanYe')) }}</template></el-table-column>
+          </el-table-column>
+          <el-table-column label="平均人数" align="center">
+            <el-table-column label="本月" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'BenYuePingJunRenShu')) }}</template></el-table-column>
+            <el-table-column label="累计" min-width="100" align="right"><template v-slot="scope">{{ format(d(scope, 'LeiJiPingJunRenShu')) }}</template></el-table-column>
+          </el-table-column>
+          <el-table-column label="工资总额(万元)" align="center">
+            <el-table-column label="本月" min-width="110" align="right"><template v-slot="scope">{{ format(d(scope, 'BenYueGongZiZongE')) }}</template></el-table-column>
+            <el-table-column label="累计" min-width="110" align="right"><template v-slot="scope">{{ format(d(scope, 'LeiJiGongZiZongE')) }}</template></el-table-column>
+          </el-table-column>
+          <el-table-column label="平均工资（元）" align="center">
+            <el-table-column label="本月" min-width="110" align="right"><template v-slot="scope">{{ format(d(scope, 'BenYuePingJunGongZi')) }}</template></el-table-column>
+            <el-table-column label="累计" min-width="110" align="right"><template v-slot="scope">{{ format(d(scope, 'LeiJiPingJunGongZi')) }}</template></el-table-column>
           </el-table-column>
         </template>
 
@@ -479,8 +428,7 @@ const reportTitle = computed(() => reportTitleMap[moduleKey.value] || moduleName
 // 单位后缀
 const reportUnitMap = {
   jingyingzongzhi: "金额单位：万元",
-  chanpinchanxiaocun: "单位：万元",
-  feimeilaodonggongzi: "工资单位：万元"
+  chanpinchanxiaocun: "单位：万元"
 };
 const reportUnit = computed(() => reportUnitMap[moduleKey.value] || "");
 
