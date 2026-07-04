@@ -49,7 +49,8 @@ const router = createRouter({
         { path: "feimeilaodonggongzi/report", meta: { name: "非煤产业劳动工资", moduleKey: "feimeilaodonggongzi" }, component: () => import("@/views/manager/TongjiGenericReport.vue") },
 
         { path: "person", meta: { name: "个人资料" }, component: () => import("@/views/manager/Person.vue") },
-        { path: "password", meta: { name: "修改密码" }, component: () => import("@/views/manager/Password.vue") }
+        { path: "password", meta: { name: "修改密码" }, component: () => import("@/views/manager/Password.vue") },
+        { path: "knowledge", meta: { name: "知识库管理" }, component: () => import("@/components/agent/KnowledgeManager.vue") }
       ]
     },
     {

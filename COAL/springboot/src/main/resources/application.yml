@@ -1,18 +1,22 @@
 server:
   port: 9090
 
+logging:
+  level:
+    '[com.example.mapper]': debug
+
 # 数据库配置 - SQL Server
 spring:
   datasource:
     driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
-    username: sa
-    password: 123456
-    url: jdbc:sqlserver://localhost:14330;databaseName=coal;encrypt=false;trustServerCertificate=true
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+    url: jdbc:sqlserver://${DB_HOST:localhost}:${DB_PORT:14330};databaseName=${DB_NAME:coal};encrypt=false;trustServerCertificate=true
 
 # 配置 MyBatis-Plus
 mybatis-plus:
   configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
     map-underscore-to-camel-case: true
   mapper-locations: classpath:mapper/*.xml
   global-config:
@@ -20,3 +24,50 @@ mybatis-plus:
       id-type: auto
 
 fileBaseUrl: http://localhost:${server.port}
+
+# Agent / RAG 配置
+coal:
+  ai:
+    llm:
+      # provider 可选: ollama | openai | deepseek | custom
+      # deepseek/custom 均走 OpenAI 兼容协议，直接用 OpenAiProvider 适配
+      provider: deepseek          # 当前使用的 LLM Provider
+      ollama:
+        base-url: http://localhost:11434
+        model: qwen2.5:7b
+      openai:
+        api-key: ${OPENAI_API_KEY:}
+        base-url: https://api.openai.com
+        model: gpt-4o-mini
+      deepseek:
+        api-key: ${DEEPSEEK_API_KEY:}
+        base-url: https://api.deepseek.com
+        model: deepseek-v4-flash
+      custom:
+        # 填入任意 OpenAI 兼容的 API 即可使用：
+        #   阿里百炼: base-url=https://dashscope.aliyuncs.com/compatible-mode/v1
+        #   智谱GLM:  base-url=https://open.bigmodel.cn/api/paas/v4
+        #   硅基流动:  base-url=https://api.siliconflow.cn/v1
+        #   Moonshot:  base-url=https://api.moonshot.cn/v1
+        api-key: ${CUSTOM_LLM_API_KEY:}
+        base-url: ${CUSTOM_LLM_BASE_URL:}
+        model: ${CUSTOM_LLM_MODEL:}
+    rag:
+      chroma:
+        base-url: http://localhost:8000
+        collection-name: coal-knowledge
+      embedding:
+        model: BAAI/bge-large-zh-v1.5
+        dimension: 1024
+      chunk:
+        size: 512
+        overlap: 50
+      retrieval:
+        top-k: 5
+        similarity-threshold: 0.7
+    memory:
+      short-term:
+        max-tokens: 4000
+        summary-threshold: 3200
+      long-term:
+        retention-days: 90

@@ -1,4 +1,4 @@
-oal<template>
+<template>
   <div>
     <div class="front-notice"><el-icon><Bell /></el-icon>公告：{{ data.top }}</div>
     <div class="front-header">

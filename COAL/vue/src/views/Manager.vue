@@ -164,6 +164,10 @@
                 <el-icon><Bell /></el-icon>
                 <span>系统公告</span>
               </el-menu-item>
+              <el-menu-item index="/manager/knowledge">
+                <el-icon><Collection /></el-icon>
+                <span>知识库管理</span>
+              </el-menu-item>
             </el-sub-menu>
 
             <el-sub-menu index="user" v-if="data.user.roleid === 1">

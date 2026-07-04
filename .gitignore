@@ -59,3 +59,19 @@ COAL/_exports_compare/
 COAL/**/*.md
 COAL/**/*.txt
 COAL/**/*.xls
+
+# ====================== #
+#     AI / Agent Docs     #
+# ====================== #
+.spec-workflow/
+.specify/
+specs/
+docs/
+.agents/
+CLAUDE.md
+.github/modernize/
+demo/
+
+# Runtime logs
+COAL/springboot_run.err
+COAL/springboot_run.out
