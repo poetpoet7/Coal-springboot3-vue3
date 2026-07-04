@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,6 +27,7 @@ public class AgentChatController {
     @Resource private CoalAssistantAgent agent;
     @Resource private ConversationService conversationService;
     @Resource private com.example.service.impl.PermissionService permissionService;
+    @Resource private com.example.agent.tool.ToolRegistry toolRegistry;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final ExecutorService executor = Executors.newCachedThreadPool();
@@ -56,15 +57,32 @@ public class AgentChatController {
                 CoalAssistantAgent.AgentResponse response = agent.chat(
                     request.getMessage(), request.getSessionId(), secCtx);
 
-                // 发送工具调用事件
+                // 发送工具调用事件（含 trace 字段）
                 if (!response.getToolCalls().isEmpty()) {
                     for (CoalAssistantAgent.ToolCall tc : response.getToolCalls()) {
-                        Map<String, Object> toolEvent = Map.of(
-                            "tool", tc.getToolName(),
-                            "params", tc.getParams()
-                        );
+                        Map<String, Object> toolEvent = new java.util.HashMap<>();
+                        toolEvent.put("tool", tc.getToolName());
+                        toolEvent.put("params", tc.getParams());
+                        toolEvent.put("accessDecision", tc.getAccessDecision());
+                        toolEvent.put("toolResultSummary", tc.getToolResultSummary());
+                        toolEvent.put("fallbackReason", tc.getFallbackReason());
                         sendEvent(emitter, "tool_call", objectMapper.writeValueAsString(toolEvent));
                     }
+
+                    // 额外发送 tool_trace 汇总事件（便于前端展示调用链路）
+                    Map<String, Object> trace = new java.util.HashMap<>();
+                    trace.put("totalCalls", response.getToolCalls().size());
+                    List<Map<String, Object>> callList = new java.util.ArrayList<>();
+                    for (CoalAssistantAgent.ToolCall tc : response.getToolCalls()) {
+                        Map<String, Object> c = new java.util.HashMap<>();
+                        c.put("tool", tc.getToolName());
+                        c.put("accessDecision", tc.getAccessDecision());
+                        c.put("toolResultSummary", tc.getToolResultSummary());
+                        c.put("fallbackReason", tc.getFallbackReason());
+                        callList.add(c);
+                    }
+                    trace.put("calls", callList);
+                    sendEvent(emitter, "tool_trace", objectMapper.writeValueAsString(trace));
                 }
 
                 // 发送回答
@@ -112,6 +130,15 @@ public class AgentChatController {
             conversationService.evictSession(sessionId);
         }
         return Result.success();
+    }
+
+    /**
+     * 获取 Agent 工具清单（只读）。
+     * 返回 name、description、parameters、accessLevel，不暴露 executor 实现。
+     */
+    @GetMapping("/tools")
+    public Result listTools() {
+        return Result.success(toolRegistry.getToolMetadata());
     }
 
     // ---- 辅助方法 ----

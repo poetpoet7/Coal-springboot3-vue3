@@ -108,9 +108,15 @@ public class KnowledgeService {
         sb.append("找到 ").append(results.size()).append(" 个相关知识片段：\n\n");
         for (int i = 0; i < results.size(); i++) {
             Retriever.RetrievalResult r = results.get(i);
-            sb.append("【来源：").append(r.chunk.title).append(" ").append(r.chunk.section).append("】")
-              .append("（相关度：").append(String.format("%.0f%%", r.similarity * 100)).append("）\n")
-              .append(r.chunk.content).append("\n\n");
+            int maxPreview = 300;
+            String preview = r.chunk.content.length() > maxPreview
+                ? r.chunk.content.substring(0, maxPreview) + "..." : r.chunk.content;
+
+            sb.append("---\n")
+              .append("source: ").append(r.chunk.title).append("\n")
+              .append("chunkId: ").append(r.chunk.chunkId).append("\n")
+              .append("score: ").append(String.format("%.4f", r.similarity)).append("\n")
+              .append("contentPreview: ").append(preview).append("\n");
         }
         return sb.toString();
     }

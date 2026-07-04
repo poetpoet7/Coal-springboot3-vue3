@@ -26,13 +26,15 @@ public class Retriever {
 
     // 内存中的向量索引（生产环境应替换为 Chroma）
     private final List<DocumentChunk> index = Collections.synchronizedList(new ArrayList<>());
+    private int idCounter = 0;
 
     /**
      * 将文档块加入索引。
      */
     public void index(String docId, String title, String section, String content) {
         float[] vector = embeddingService.embed(content);
-        index.add(new DocumentChunk(docId, title, section, content, vector));
+        int id = ++idCounter;
+        index.add(new DocumentChunk(id, docId, title, section, content, vector));
     }
 
     /**
@@ -73,13 +75,15 @@ public class Retriever {
     // ---- 内部类 ----
 
     public static class DocumentChunk {
+        public final int chunkId;       // 稳定索引ID
         public final String docId;
         public final String title;
         public final String section;
         public final String content;
         public final float[] vector;
 
-        public DocumentChunk(String docId, String title, String section, String content, float[] vector) {
+        public DocumentChunk(int chunkId, String docId, String title, String section, String content, float[] vector) {
+            this.chunkId = chunkId;
             this.docId = docId;
             this.title = title;
             this.section = section;
@@ -90,7 +94,7 @@ public class Retriever {
 
     public static class RetrievalResult {
         public final DocumentChunk chunk;
-        public final double similarity;
+        public final double similarity;   // 余弦相似度 score
 
         public RetrievalResult(DocumentChunk chunk, double similarity) {
             this.chunk = chunk;

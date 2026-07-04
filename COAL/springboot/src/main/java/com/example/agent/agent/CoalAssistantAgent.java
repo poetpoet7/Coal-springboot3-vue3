@@ -85,6 +85,8 @@ public class CoalAssistantAgent {
                 ToolDefinition tool = toolRegistry.get(tc.toolName);
 
                 if (tool == null) {
+                    tc.setAccessDecision("NOT_FOUND");
+                    tc.setFallbackReason("工具 " + tc.toolName + " 未在 ToolRegistry 中注册");
                     toolResults.append("[错误] 未知工具: ").append(tc.toolName).append("\n");
                     continue;
                 }
@@ -92,6 +94,8 @@ public class CoalAssistantAgent {
                 // AccessGuard 检查
                 if (!accessGuard.checkAndLog(tool, new AccessGuard.MapParams(tc.params),
                     secCtx.getUserId(), session.getSessionId())) {
+                    tc.setAccessDecision("BLOCKED");
+                    tc.setFallbackReason("AccessGuard 拒绝 WRITE 工具 " + tc.toolName);
                     toolResults.append("[拒绝] 工具 ").append(tc.toolName)
                         .append(" 需要写权限，Agent 不可执行。\n");
                     continue;
@@ -101,6 +105,8 @@ public class CoalAssistantAgent {
                 if ("query_stat_data".equals(tc.toolName) && tc.params.containsKey("unitId")) {
                     Integer targetUnitId = toInteger(tc.params.get("unitId"));
                     if (targetUnitId != null && secCtx.isForbidden(targetUnitId)) {
+                        tc.setAccessDecision("PERMISSION_DENIED");
+                        tc.setFallbackReason("用户(" + secCtx.getDanweiName() + ")无权访问单位ID=" + targetUnitId);
                         toolResults.append("[权限拒绝] 您（").append(secCtx.getDanweiName())
                             .append("）无权访问单位ID=").append(targetUnitId)
                             .append(" 的数据。只能查看").append(secCtx.getDanweiName())
@@ -116,6 +122,15 @@ public class CoalAssistantAgent {
                     toolResult = knowledgeService.search(query);
                 } else {
                     toolResult = tool.execute(tc.params);
+                }
+
+                // 填充 trace 字段
+                tc.setAccessDecision("ALLOWED");
+                String summary = toolResult != null && toolResult.length() > 200
+                    ? toolResult.substring(0, 200) + "..." : toolResult;
+                tc.setToolResultSummary(summary);
+                if (toolResult != null && toolResult.startsWith("查询失败")) {
+                    tc.setFallbackReason("Tool 执行返回错误: " + summary);
                 }
 
                 toolResults.append("工具 ").append(tc.toolName).append(" 返回结果：\n").append(toolResult).append("\n");
@@ -257,15 +272,24 @@ public class CoalAssistantAgent {
         private final String callId;
         private final String toolName;
         private final Map<String, Object> params;
+        private String accessDecision;      // ALLOWED / BLOCKED / PERMISSION_DENIED / NOT_FOUND
+        private String toolResultSummary;   // 结果摘要（前200字符）
+        private String fallbackReason;      // null=成功, 非null=失败原因
 
         public ToolCall(String callId, String toolName, Map<String, Object> params) {
             this.callId = callId;
             this.toolName = toolName;
             this.params = params;
         }
-        public String getId() { return callId; }      // Jackson: "id"
+        public String getId() { return callId; }
         public String getCallId() { return callId; }
         public String getToolName() { return toolName; }
         public Map<String, Object> getParams() { return params; }
+        public String getAccessDecision() { return accessDecision; }
+        public void setAccessDecision(String v) { this.accessDecision = v; }
+        public String getToolResultSummary() { return toolResultSummary; }
+        public void setToolResultSummary(String v) { this.toolResultSummary = v; }
+        public String getFallbackReason() { return fallbackReason; }
+        public void setFallbackReason(String v) { this.fallbackReason = v; }
     }
 }

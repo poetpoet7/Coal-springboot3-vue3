@@ -364,6 +364,23 @@ public class ToolRegistry {
         return tools.values();
     }
 
+    /**
+     * 输出只读工具清单（供 /api/agent/tools 接口使用）。
+     * 返回 name、description、parameters、accessLevel，不暴露 executor。
+     */
+    public List<Map<String, Object>> getToolMetadata() {
+        List<Map<String, Object>> list = new ArrayList<>();
+        for (ToolDefinition t : tools.values()) {
+            Map<String, Object> m = new HashMap<>();
+            m.put("name", t.getName());
+            m.put("description", t.getDescription());
+            m.put("accessLevel", t.getAccessLevel().name());
+            m.put("parameters", t.getParameters());
+            list.add(m);
+        }
+        return list;
+    }
+
     // ---- 辅助方法 ----
 
     private String getTableName(String moduleKey) {
